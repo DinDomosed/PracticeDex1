@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using BankSystem.Domain.Models;
+using BankSystem.App.Services;
 namespace Practice
 {
     internal class Program
@@ -18,17 +19,46 @@ namespace Practice
             
             Console.WriteLine(new string('-', 20));
 
-            UpdateContractEmployee(employee);
-            Console.WriteLine(employee.ContractEmployee.ToString());
+            // Тестирование метода для преобразования Клиента в сотрудника....
+            BankService bankService = new BankService();
+            Employee newEmployee = bankService.ConvertClientToEmployee(client);
+            Console.WriteLine('\n' + new string('=', 20));
+            Console.WriteLine(newEmployee.ToString());
+            Console.WriteLine('\n' + new string('=', 20));
 
-            Console.WriteLine(new string('=', 20) +'\n');
-            
-            Currency currency = new Currency("USD", '$');
-            Console.WriteLine(currency.ToString() + "\n");
-            UpdateCurrency(ref currency);
-            Console.WriteLine(currency.ToString());
+            List<Employee> employees = new List<Employee>
+            {
+                new Employee("Соколов Андрей Андреевич",  new DateTime(1980, 4, 4), new EmployeeContract(DateTime.Now, new DateTime(2100, 1, 13), 0, "Владелец")),
+                new Employee("Соколов Василий Витальевич",  new DateTime(1983, 12, 6), new EmployeeContract(DateTime.Now, new DateTime(2100, 1, 13), 0, "Владелец")),
+            };
+            employees.Add(newEmployee);
+            employees.Add(employee);
+
+            // Тестирование метода для расчета запрлаты Владельцев....
+            bankService.CalculateOwnerSalaries(employees, 13000000, 9000000);
+
+            Console.WriteLine('\n' + new string('=', 20) + '\n');
+            foreach (var empl  in employees)
+            { 
+                Console.WriteLine(empl.ToString()) ;
+                Console.WriteLine('\n' + new string('=', 20)+'\n');
+            }
 
 
+            ////Тестирование метода для обновление контракта с существующим сотрудником ......
+
+            //UpdateContractEmployee(employee);
+            //Console.WriteLine(employee.ContractEmployee.ToString());
+
+            //Console.WriteLine(new string('=', 20) + '\n');
+
+            //Currency currency = new Currency("USD", '$');
+
+            ////Тестирование метода для обновления валюты .....
+
+            //Console.WriteLine(currency.ToString() + "\n");
+            //UpdateCurrency(ref currency);
+            //Console.WriteLine(currency.ToString());
         }
         static void UpdateContractEmployee (Employee employee)
         {
@@ -60,7 +90,6 @@ namespace Practice
 
             Console.Write("Введите должность сотрудника: ");
             string newPost = Console.ReadLine();
-
 
             EmployeeContract newContract = new EmployeeContract(newDateStart, newDateEnd, newSalary, newPost);
             employee.SetContract(newContract);

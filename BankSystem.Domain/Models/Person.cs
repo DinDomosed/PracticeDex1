@@ -29,6 +29,13 @@ namespace BankSystem.Domain.Models
             this.FullName = FullName;
             this.Birthday = Birthday;
             Id = Guid.NewGuid();
-        }       
+        }      
+        
+        public Person(Guid Id, string FullName, DateTime Birthday )
+        {
+            this.Id = Id;
+            this.FullName = FullName;
+            this.Birthday = Birthday;
+        }
     }
 }

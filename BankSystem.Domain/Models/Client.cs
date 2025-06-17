@@ -6,13 +6,20 @@ using System.Threading.Tasks;
 
 namespace BankSystem.Domain.Models
 {
-    public class Client : Person 
+    public class Client : Person
     {
         public string Email { get; private set; }
         public string PhoneNumber { get; private set; }
         public string PassportNumber { get; private set; }
         public DateTime RegistrationDate { get; private set; }
-        public Client (string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber) : base (FullName, birthday)
+        public Client(string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber) : base(FullName, birthday)
+        {
+            Email = email;
+            PhoneNumber = phoneNumber;
+            PassportNumber = passportNumber;
+            RegistrationDate = DateTime.Now;
+        }
+        public Client(Guid Id, string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber) : base(Id, FullName, birthday)
         {
             Email = email;
             PhoneNumber = phoneNumber;

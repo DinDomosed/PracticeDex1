@@ -21,6 +21,10 @@ namespace BankSystem.Domain.Models
             this.Salary = Salary;
             this.Post = Post;
         }
+        public void SetSalaryForOwner (decimal salary)
+        {
+            this.Salary = salary;
+        }
         public override string ToString()
         {
             return $"Дата заключения контракта: {StartOfWork:d}\n" +
