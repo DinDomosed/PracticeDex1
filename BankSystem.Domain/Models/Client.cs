@@ -8,6 +8,7 @@ namespace BankSystem.Domain.Models
 {
     public class Client : Person
     {
+        public List<Account> Accounts { get; private set; } = new List<Account>();
         public string Email { get; private set; }
         public string PhoneNumber { get; private set; }
         public string PassportNumber { get; private set; }

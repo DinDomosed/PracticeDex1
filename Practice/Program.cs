@@ -19,30 +19,45 @@ namespace Practice
             
             Console.WriteLine(new string('-', 20));
 
-            // Тестирование метода для преобразования Клиента в сотрудника....
-            BankService bankService = new BankService();
-            Employee newEmployee = bankService.ConvertClientToEmployee(client);
-            Console.WriteLine('\n' + new string('=', 20));
-            Console.WriteLine(newEmployee.ToString());
-            Console.WriteLine('\n' + new string('=', 20));
 
-            List<Employee> employees = new List<Employee>
+            //Тестирование класса Account и интерфейса INotifyPropertyChanged
+            client.Accounts.Add(new Account(new Currency("USD", '$'), 2000));
+            
+            foreach (var account in client.Accounts)
             {
-                new Employee("Соколов Андрей Андреевич",  new DateTime(1980, 4, 4), new EmployeeContract(DateTime.Now, new DateTime(2100, 1, 13), 0, "Владелец")),
-                new Employee("Соколов Василий Витальевич",  new DateTime(1983, 12, 6), new EmployeeContract(DateTime.Now, new DateTime(2100, 1, 13), 0, "Владелец")),
-            };
-            employees.Add(newEmployee);
-            employees.Add(employee);
-
-            // Тестирование метода для расчета запрлаты Владельцев....
-            bankService.CalculateOwnerSalaries(employees, 13000000, 9000000);
-
-            Console.WriteLine('\n' + new string('=', 20) + '\n');
-            foreach (var empl  in employees)
-            { 
-                Console.WriteLine(empl.ToString()) ;
-                Console.WriteLine('\n' + new string('=', 20)+'\n');
+                var acc = account;
+                account.PropertyChanged += (sender, args) => 
+                Console.WriteLine($"Свойство {args.PropertyName} изменилось . На счету {acc.Amount} {acc.Currency.Symbol}");
             }
+            client.Accounts[0].PutMoney(1000);
+            client.Accounts[0].GetMoney(1500);
+
+
+
+            // Тестирование метода для преобразования Клиента в сотрудника....
+            //BankService bankService = new BankService();
+            //Employee newEmployee = bankService.ConvertClientToEmployee(client);
+            //Console.WriteLine('\n' + new string('=', 20));
+            //Console.WriteLine(newEmployee.ToString());
+            //Console.WriteLine('\n' + new string('=', 20));
+
+            //List<Employee> employees = new List<Employee>
+            //{
+            //    new Employee("Соколов Андрей Андреевич",  new DateTime(1980, 4, 4), new EmployeeContract(DateTime.Now, new DateTime(2100, 1, 13), 0, "Владелец")),
+            //    new Employee("Соколов Василий Витальевич",  new DateTime(1983, 12, 6), new EmployeeContract(DateTime.Now, new DateTime(2100, 1, 13), 0, "Владелец")),
+            //};
+            //employees.Add(newEmployee);
+            //employees.Add(employee);
+
+            //// Тестирование метода для расчета запрлаты Владельцев....
+            //bankService.CalculateOwnerSalaries(employees, 13000000, 9000000);
+
+            //Console.WriteLine('\n' + new string('=', 20) + '\n');
+            //foreach (var empl  in employees)
+            //{ 
+            //    Console.WriteLine(empl.ToString()) ;
+            //    Console.WriteLine('\n' + new string('=', 20)+'\n');
+            //}
 
 
             ////Тестирование метода для обновление контракта с существующим сотрудником ......
