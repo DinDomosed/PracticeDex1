@@ -1,84 +1,83 @@
 ﻿using System.Runtime.CompilerServices;
 using BankSystem.Domain.Models;
 using BankSystem.App.Services;
+using System.Diagnostics;
 namespace Practice
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(new string('-',20));
-           
-            Employee employee = new Employee("Ковальчук Диана Андреевна", new DateTime(2003, 12, 31), new EmployeeContract(DateTime.Now, new DateTime(2040, 1, 13), 500, "Backend developer"));
-            Console.WriteLine(employee.ToString() + '\n');
-            
-            Console.WriteLine(new string('-', 20));
-           
-            Client client = new Client("Неказаков Вячеслав Андреевич ", new DateTime(1980, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623");
-            Console.WriteLine(client.ToString());
-            
-            Console.WriteLine(new string('-', 20));
+            int countGenerate = 1000;
+            var generator = new TestDataGenerator();
+
+            var listClients = generator.GenerateTestListClients();
+            var dictionaryClients = generator.GenerateTestDictionaryClients(listClients, countGenerate);
+            var listEmployee = generator.GenerateTestListEmployee(countGenerate);
+
+            //Замер времени выполнения поиска по списку
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Client foundClient = listClients.Find(c => c.PhoneNumber == "+7 918 123 36 78");
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.ElapsedMilliseconds + " мс");
+            Console.WriteLine(stopwatch.ElapsedTicks + "тиков");
+            Console.WriteLine(foundClient.ToString());
 
 
-            //Тестирование класса Account и интерфейса INotifyPropertyChanged
-            client.Accounts.Add(new Account(new Currency("USD", '$'), 2000));
-            
-            foreach (var account in client.Accounts)
+            //Замер времени выполнения поиска по словарю
+
+            stopwatch.Restart();
+            Client foundClientInDic = dictionaryClients["+7 918 123 36 78"];
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.ElapsedMilliseconds + " мс");
+            Console.WriteLine(stopwatch.ElapsedTicks + "тиков");
+            Console.WriteLine(foundClientInDic.ToString());
+
+            //Выборка клиентов , чей возраст ниже определенного значения
+
+            var clientAge = listClients
+                .Where(c => c.Age < 21)
+                .ToList();
+            for (int i = 0; i < clientAge.Count; i++)
             {
-                var acc = account;
-                account.PropertyChanged += (sender, args) => 
-                Console.WriteLine($"Свойство {args.PropertyName} изменилось . На счету {acc.Amount} {acc.Currency.Symbol}");
+                Console.WriteLine(clientAge[i].ToString() + i);
             }
-            client.Accounts[0].PutMoney(1000);
-            client.Accounts[0].GetMoney(1500);
+
+            //Поиск сотрудника с минимальной зп
+
+            var minSalary = listEmployee.MinBy(c => c.ContractEmployee.Salary);
+            Console.WriteLine(new string('-', 10));
+            Console.WriteLine("Сотрудник с минимальной зарплатой:\n\n {0}", minSalary);
+
+            //Сравнение скорости по словарю между поиском по LastOrDefault и ключу
+            stopwatch.Restart();
+            var lastClient = dictionaryClients.LastOrDefault();
+            if (!lastClient.Equals(default(KeyValuePair<string, Client>)))
+                Console.WriteLine(lastClient.ToString());
+            stopwatch.Stop();
+
+            Console.WriteLine($"Итоги поиска последнего элемента с помощью метода LINQ, LastOrDefault:\n\n" +
+                    $"Время поиска - {stopwatch.ElapsedMilliseconds} миллисекунд\n" +
+                    $"{stopwatch.ElapsedTicks} тиков\n\n");
 
 
+            stopwatch.Restart();
+            if (dictionaryClients.TryGetValue(lastClient.Key, out Client value))
+                Console.WriteLine(value.ToString());
+            stopwatch.Stop();
 
-            // Тестирование метода для преобразования Клиента в сотрудника....
-            //BankService bankService = new BankService();
-            //Employee newEmployee = bankService.ConvertClientToEmployee(client);
-            //Console.WriteLine('\n' + new string('=', 20));
-            //Console.WriteLine(newEmployee.ToString());
-            //Console.WriteLine('\n' + new string('=', 20));
+            Console.WriteLine($"Итоги поиска по ключу : \n\n" +
+                   $"Время поиска - {stopwatch.ElapsedMilliseconds} mc\n" +
+                   $"{stopwatch.ElapsedTicks} тиков");
 
-            //List<Employee> employees = new List<Employee>
-            //{
-            //    new Employee("Соколов Андрей Андреевич",  new DateTime(1980, 4, 4), new EmployeeContract(DateTime.Now, new DateTime(2100, 1, 13), 0, "Владелец")),
-            //    new Employee("Соколов Василий Витальевич",  new DateTime(1983, 12, 6), new EmployeeContract(DateTime.Now, new DateTime(2100, 1, 13), 0, "Владелец")),
-            //};
-            //employees.Add(newEmployee);
-            //employees.Add(employee);
+            //Итог, поиск по ключу быстрее
 
-            //// Тестирование метода для расчета запрлаты Владельцев....
-            //bankService.CalculateOwnerSalaries(employees, 13000000, 9000000);
-
-            //Console.WriteLine('\n' + new string('=', 20) + '\n');
-            //foreach (var empl  in employees)
-            //{ 
-            //    Console.WriteLine(empl.ToString()) ;
-            //    Console.WriteLine('\n' + new string('=', 20)+'\n');
-            //}
-
-
-            ////Тестирование метода для обновление контракта с существующим сотрудником ......
-
-            //UpdateContractEmployee(employee);
-            //Console.WriteLine(employee.ContractEmployee.ToString());
-
-            //Console.WriteLine(new string('=', 20) + '\n');
-
-            //Currency currency = new Currency("USD", '$');
-
-            ////Тестирование метода для обновления валюты .....
-
-            //Console.WriteLine(currency.ToString() + "\n");
-            //UpdateCurrency(ref currency);
-            //Console.WriteLine(currency.ToString());
         }
-        static void UpdateContractEmployee (Employee employee)
+        static void UpdateContractEmployee(Employee employee)
         {
             Console.Write("Введите дату заключения контракта (гггг-мм-дд): ");
-            if(!DateTime.TryParse(Console.ReadLine(), out DateTime newDateStart))
+            if (!DateTime.TryParse(Console.ReadLine(), out DateTime newDateStart))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Ошибка: неверная дата");
@@ -87,7 +86,7 @@ namespace Practice
             }
 
             Console.Write("Введите дату окончания контракта (гггг-мм-дд): ");
-            if(!DateTime.TryParse(Console.ReadLine(), out DateTime newDateEnd))
+            if (!DateTime.TryParse(Console.ReadLine(), out DateTime newDateEnd))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Ошибка: неверная дата");
@@ -96,7 +95,7 @@ namespace Practice
             }
 
             Console.Write("Укажите зарплату сотрудника: ");
-            if(!Decimal.TryParse(Console.ReadLine(), out decimal newSalary))
+            if (!Decimal.TryParse(Console.ReadLine(), out decimal newSalary))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Ошибка: неверный формат ввода");
@@ -113,7 +112,7 @@ namespace Practice
             Console.WriteLine($"Контракт для сотрудника {employee.FullName},  успешно обновлен!\n");
             Console.ResetColor();
         }
-        static void UpdateCurrency (ref Currency currency)
+        static void UpdateCurrency(ref Currency currency)
         {
             Console.Write("Введите код новой валюты: ");
             string newCode = Console.ReadLine();

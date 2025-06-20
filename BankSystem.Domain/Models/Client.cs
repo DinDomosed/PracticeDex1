@@ -31,6 +31,7 @@ namespace BankSystem.Domain.Models
         {
             return $"Имя клииента: {FullName}\n" +
                 $"Дата рождения: {Birthday:d}\n" +
+                $"Возраст: {Age} лет\n" +
                 $"Почта: {Email}\n" +
                 $"Номер телефона {PhoneNumber}\n" +
                 $"Серия и номер паспорта: {PassportNumber}\n" +
