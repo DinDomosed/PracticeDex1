@@ -13,19 +13,21 @@ namespace BankSystem.Domain.Models
         public string PhoneNumber { get; private set; }
         public string PassportNumber { get; private set; }
         public DateTime RegistrationDate { get; private set; }
-        public Client(string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber) : base(FullName, birthday)
+        public Client(string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber, Account account) : base(FullName, birthday)
         {
             Email = email;
             PhoneNumber = phoneNumber;
             PassportNumber = passportNumber;
             RegistrationDate = DateTime.Now;
+            Accounts.Add(account);
         }
-        public Client(Guid Id, string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber) : base(Id, FullName, birthday)
+        public Client(Guid Id, string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber, Account account) : base(Id, FullName, birthday)
         {
             Email = email;
             PhoneNumber = phoneNumber;
             PassportNumber = passportNumber;
             RegistrationDate = DateTime.Now;
+            Accounts.Add(account);
         }
         public override string ToString()
         {
@@ -35,8 +37,25 @@ namespace BankSystem.Domain.Models
                 $"Почта: {Email}\n" +
                 $"Номер телефона {PhoneNumber}\n" +
                 $"Серия и номер паспорта: {PassportNumber}\n" +
-                $"Дата регистрации: {RegistrationDate:d}\n\n" +
+                $"Дата регистрации: {RegistrationDate:d}\n" +
+                $"Колличество счетов {Accounts.Count}\n\n" +
                 $"ID клиента: {Id}";
+        }
+        public override bool Equals(object? obj)
+        {
+            if (obj is not Client client || obj == null)
+                return false;
+
+            return FullName == client.FullName && Birthday == client.Birthday &&
+                Email == client.Email && PhoneNumber == client.PhoneNumber &&
+                PassportNumber == client.PassportNumber && 
+                Accounts.Count == client.Accounts.Count &&
+                Id == client.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(FullName, Birthday, Email, PhoneNumber, PassportNumber, Id);
         }
     }
 }

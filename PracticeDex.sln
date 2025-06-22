@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{EBA9BC57-CA30-4FF7-8713-57CDA31C2829}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSystem.App", "BankSystem.App\BankSystem.App.csproj", "{2DA581FB-1976-4856-8F7E-D33F71B06E94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSystem.App.Tests", "TestProject1\BankSystem.App.Tests.csproj", "{0483C067-C12F-4FD8-B3B1-65A35D7F175E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{2DA581FB-1976-4856-8F7E-D33F71B06E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DA581FB-1976-4856-8F7E-D33F71B06E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DA581FB-1976-4856-8F7E-D33F71B06E94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0483C067-C12F-4FD8-B3B1-65A35D7F175E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0483C067-C12F-4FD8-B3B1-65A35D7F175E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0483C067-C12F-4FD8-B3B1-65A35D7F175E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0483C067-C12F-4FD8-B3B1-65A35D7F175E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -41,6 +47,7 @@ Global
 		{A12B1979-F4C3-4236-B956-950B88FD40EF} = {36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}
 		{D87E203A-23F6-4A31-AEAA-452D74A6BD5D} = {0982C1E0-5884-4B75-98CB-671396205F54}
 		{2DA581FB-1976-4856-8F7E-D33F71B06E94} = {EBA9BC57-CA30-4FF7-8713-57CDA31C2829}
+		{0483C067-C12F-4FD8-B3B1-65A35D7F175E} = {EBA9BC57-CA30-4FF7-8713-57CDA31C2829}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADF40A6F-CE65-4C3F-B0F1-E0A74FF37C55}

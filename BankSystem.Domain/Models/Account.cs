@@ -12,11 +12,14 @@ namespace BankSystem.Domain.Models
     {
         public Currency Currency { get; private set; }
         public decimal Amount { get; private set; }
+        public string AccountNumber { get; private set; }
+
 
         public Account (Currency currency, decimal amount)
         {
             Currency = currency;
             Amount = amount;
+            AccountNumber = GenerateAccountNumber();
         }
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -29,7 +32,6 @@ namespace BankSystem.Domain.Models
         {
             Amount += Math.Abs(sum);
             OnPropertyChanged(nameof(Amount));
-            
         }
         public decimal GetMoney(decimal sum)
         {
@@ -39,7 +41,19 @@ namespace BankSystem.Domain.Models
                 OnPropertyChanged (nameof(Amount));
             }
             return Amount;
+        }
+        private string GenerateAccountNumber()
+        {
+            Random random = new Random();
+            return "4081" + random.Next(100000000, 999999999).ToString();
+        }
 
+        public override string ToString()
+        {
+            return $"Данные счета:\n" +
+                $"Номер счета {AccountNumber}" +
+                $"Валюта счета: {Currency.Code}\n" +
+                $"Сумма на счету: {Amount:C}";
         }
 
     }

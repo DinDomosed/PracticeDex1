@@ -32,5 +32,20 @@ namespace BankSystem.Domain.Models
                 $"{ContractEmployee.ToString()}\n\n" +
                 $"ID сотрудника: {Id}";
         }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null || !(obj is Employee employee))
+                return false;
+
+            return FullName == employee.FullName &&
+                Birthday == employee.Birthday &&
+                ContractEmployee.Post == employee.ContractEmployee.Post &&
+                Id == employee.Id;
+        }
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(FullName, Birthday, ContractEmployee.Post);
+        }
     }
 }
