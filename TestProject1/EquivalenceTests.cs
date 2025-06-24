@@ -16,12 +16,14 @@ namespace BankSystem.App.Tests
             // Arrange
             TestDataGenerator generator = new TestDataGenerator();
             var testdic = generator.GenerateTestDictoinaryClientAndAccount(null, 10);
-            var lastPair = testdic.LastOrDefault();
+            Guid guid1 = Guid.NewGuid();
 
-            Guid guid = lastPair.Key.Id;
+            Client clientTest = new Client(guid1, "Тестовый клиент2", new DateTime(2008, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
+                new Account(new Currency("USD", '$'), 2400));
 
+            testdic.Add(clientTest, clientTest.Accounts);
 
-            Client client = new Client(guid, "Неказаков Вячеслав Андреевич ", new DateTime(1980, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
+            Client client = new Client(guid1, "Тестовый клиент2", new DateTime(2008, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
                 new Account(new Currency("USD", '$'), 2400));
 
             //Act

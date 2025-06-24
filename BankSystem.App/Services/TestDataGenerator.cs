@@ -39,7 +39,7 @@ namespace BankSystem.App.Services
             }
             //Клиент для тестов
             decimal testAmount = 2400;
-            list.Add(new Client("Неказаков Вячеслав Андреевич ", new DateTime(1980, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
+            list.Add(new Client("Неказаков Вячеслав Андреевич", new DateTime(2016 , 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
                 new Account(new Currency("USD", '$'), testAmount)));
             return list;
         }
