@@ -31,19 +31,18 @@ namespace BankSystem.App.Services
             _employeeStorage.AddEmployeeToStorage(employee);
             return true;
         }
-        public bool EditingEmployeeContract(string fullName, string passportNum, DateTime? newDateStartWork, DateTime? newDateEndWork, 
-            decimal? newSalary, string? newPost)
+        public bool EditingEmployeeContract(string fullName, string passportNum, DateTime? newDateStartWork, DateTime? newDateEndWork, decimal? newSalary, string? newPost)
         {
             if(string.IsNullOrWhiteSpace(fullName)) 
                 throw new ArgumentNullException("Имя не может быть пустым", nameof(fullName));
             if (string.IsNullOrWhiteSpace(passportNum))
                 throw new PassportNumberNullOrWhiteSpaceException("Некорректный ввод серии и номера паспорта");
 
-          
-                 
             Employee employee = _employeeStorage.AllEmployeeBank.FirstOrDefault(u => u.Value.FullName == fullName && u.Value.PassportNumber == passportNum).Value;
+
             if (employee == null)
                 throw new EmployeeNotFoundException("Ошибка: Сотрудник не существует");
+
 
             var start = newDateStartWork ?? employee.ContractEmployee.StartOfWork;
             var end = newDateEndWork ?? employee.ContractEmployee.EndOfContract;
@@ -61,10 +60,13 @@ namespace BankSystem.App.Services
 
             if (!string.IsNullOrWhiteSpace(fullName))
                 employees = employees.Where(u => u.FullName.Contains(fullName, StringComparison.OrdinalIgnoreCase));
+
             if (!string.IsNullOrWhiteSpace(passportNumber))
                 employees = employees.Where(u => u.PassportNumber == passportNumber);
+
             if(fromThisDateBirthday != default(DateTime))
                 employees = employees.Where(u => u.Birthday >= fromThisDateBirthday);
+
             if(beforeThisDateBirthday != default(DateTime))
             {
                 if (fromThisDateBirthday.HasValue && fromThisDateBirthday < beforeThisDateBirthday)
@@ -72,8 +74,10 @@ namespace BankSystem.App.Services
                 else
                     employees = employees.Where(u => u.Birthday <= beforeThisDateBirthday);
             }
+
             if (fromThisSalary.HasValue)
                 employees = employees.Where(u => u.ContractEmployee.Salary >= fromThisSalary);
+
             if(beforeThisSalary.HasValue)
             {
                 if (fromThisSalary.HasValue && fromThisSalary < beforeThisSalary)

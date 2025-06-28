@@ -46,6 +46,7 @@ namespace BankSystem.App.Services
                 throw new ArgumentException("Ошибка: такого клиента нет в базе");
 
             _clientStorage.AllBankClients.TryGetValue(client.Id, out Client client1);
+
             if (client1 != null)
                 client1.Accounts.Add(account);
             return true;
@@ -91,6 +92,7 @@ namespace BankSystem.App.Services
 
             if (fromThisDate != null)
                 clients = clients.Where(u => u.Birthday >= fromThisDate);
+
             if (beforeThisDate != null)
             {
                 if (fromThisDate != null && beforeThisDate > fromThisDate)
