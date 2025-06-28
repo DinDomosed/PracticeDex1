@@ -31,27 +31,26 @@ namespace BankSystem.App.Services
             _employeeStorage.AddEmployeeToStorage(employee);
             return true;
         }
-        public bool EditingEmployeeContract(string fullName, string passportNum, DateTime newDateStartWork, DateTime newDateEndWork, 
-            decimal newSalary, string newPost)
+        public bool EditingEmployeeContract(string fullName, string passportNum, DateTime? newDateStartWork, DateTime? newDateEndWork, 
+            decimal? newSalary, string? newPost)
         {
             if(string.IsNullOrWhiteSpace(fullName)) 
                 throw new ArgumentNullException("Имя не может быть пустым", nameof(fullName));
             if (string.IsNullOrWhiteSpace(passportNum))
                 throw new PassportNumberNullOrWhiteSpaceException("Некорректный ввод серии и номера паспорта");
-            if (newDateStartWork == default(DateTime))
-                throw new ArgumentNullException("Некорректный ввод даты начала работы");
-            if (newDateEndWork == default(DateTime))
-                throw new ArgumentNullException("Некорректный ввод даты окончания контракта");
-            if (newSalary == default(decimal))
-                throw new ArgumentNullException("Неккоректный ввод зарплаты");
-            if (string.IsNullOrWhiteSpace(newPost))
-                throw new ArgumentNullException("Неккоректная должность");
+
+          
                  
             Employee employee = _employeeStorage.AllEmployeeBank.FirstOrDefault(u => u.Value.FullName == fullName && u.Value.PassportNumber == passportNum).Value;
             if (employee == null)
                 throw new EmployeeNotFoundException("Ошибка: Сотрудник не существует");
 
-            employee.SetContract(new EmployeeContract(newDateStartWork, newDateEndWork, newSalary, newPost));
+            var start = newDateStartWork ?? employee.ContractEmployee.StartOfWork;
+            var end = newDateEndWork ?? employee.ContractEmployee.EndOfContract;
+            var salary = newSalary ?? employee.ContractEmployee.Salary;
+            var post = newPost ?? employee.ContractEmployee?.Post;
+
+            employee.SetContract(new EmployeeContract(start, end, salary, post));
             return true;
         }
 
