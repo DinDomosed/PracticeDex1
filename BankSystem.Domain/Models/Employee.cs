@@ -9,14 +9,17 @@ namespace BankSystem.Domain.Models
     public class Employee : Person
     {
         public EmployeeContract ContractEmployee {  get; private set; }
+        public string PassportNumber { get; private set; }
 
-        public Employee (string FullName, DateTime Birthday, EmployeeContract contract) : base (FullName, Birthday)
+        public Employee (string FullName, DateTime Birthday, EmployeeContract contract, string passportNumber) : base (FullName, Birthday)
         {
             ContractEmployee = contract;
+            PassportNumber = passportNumber;
         }
-        public Employee(Guid Id, string FullName, DateTime Birthday, EmployeeContract contract) : base(Id, FullName, Birthday)
+        public Employee(Guid Id, string FullName, DateTime Birthday, EmployeeContract contract, string passportNumber) : base(Id, FullName, Birthday)
         {
             ContractEmployee = contract;
+            PassportNumber = passportNumber;
         }
 
         public void SetContract (EmployeeContract contract)
@@ -29,7 +32,8 @@ namespace BankSystem.Domain.Models
                 $"Дата Рождения: {Birthday:d}\n" +
                 $"Возраст: {Age}\n" +
                 $"Информация о контракте:\n\n" +
-                $"{ContractEmployee.ToString()}\n\n" +
+                $"{ContractEmployee.ToString()}\n" +
+                $"${PassportNumber}\n\n" +
                 $"ID сотрудника: {Id}";
         }
 

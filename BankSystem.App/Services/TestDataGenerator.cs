@@ -72,7 +72,8 @@ namespace BankSystem.App.Services
                 .CustomInstantiator(f => new Employee(
                     f.Name.FullName(),
                     f.Date.Past(90, DateTime.Today.AddYears(-18)),
-                    fakerContract.Generate()));
+                    fakerContract.Generate(),
+                    f.Random.Replace("#### ######")));
 
 
             for (int i = 0; i < count; i++)
@@ -80,7 +81,7 @@ namespace BankSystem.App.Services
 
             //Сотрудник для тестов
             list.Add(new Employee("Ковальчук Диана Андреевна", new DateTime(2003, 12, 31),
-                new EmployeeContract(new DateTime(2025, 7, 1), new DateTime(2060, 7, 1), 600, "backend developer")));
+                new EmployeeContract(new DateTime(2025, 7, 1), new DateTime(2060, 7, 1), 600, "backend developer"), "4324 666666"));
 
             return list;
         }

@@ -18,31 +18,31 @@ namespace BankSystem.App.Tests
             List<Employee> employees = new List<Employee>()
             {
                 new Employee("Тестовый сотрудник1", new DateTime(2006, 9, 6), //18
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 111111"),
 
                 new Employee("Тестовый сотрудник2", new DateTime(2005, 10, 19),//19
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 222222"),
 
                 new Employee("Тестовый сотрудник3", new DateTime(2000, 6, 14),//25
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 333333"),
 
                 new Employee("Тестовый сотрудник4", new DateTime(2004, 9, 5), //20
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 444444"),
 
                 new Employee("Тестовый сотрудник5", new DateTime(1999, 3, 12),//26
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 555555"),
 
                 new Employee("Тестовый сотрудник6", new DateTime(1990, 4, 30),//35
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 666666"),
 
                 new Employee("Тестовый сотрудник7", new DateTime(2000, 9, 11), //24
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 777777"),
 
                 new Employee("Тестовый сотрудник8", new DateTime(1980, 9, 6), //44
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 888888"),
 
                 new Employee("Тестовый сотрудник9", new DateTime(1999, 9, 6), //25
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 999999"),
             };
 
             //Act
@@ -63,31 +63,31 @@ namespace BankSystem.App.Tests
             List<Employee> employees = new List<Employee>()
             {
                 new Employee("Тестовый сотрудник1", new DateTime(2006, 9, 6), //18
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 111111"),
 
                 new Employee("Тестовый сотрудник2", new DateTime(2005, 10, 19),//19
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 222222"),
 
                 new Employee("Тестовый сотрудник3", new DateTime(2000, 6, 14),//25
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 333333"),
 
                 new Employee("Тестовый сотрудник4", new DateTime(2004, 9, 5), //20
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 444444"),
 
                 new Employee("Тестовый сотрудник5", new DateTime(1999, 3, 12),//26
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 555555"),
 
                 new Employee("Тестовый сотрудник6", new DateTime(1990, 4, 30),//35
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 666666"),
 
                 new Employee("Тестовый сотрудник7", new DateTime(2000, 9, 11), //24
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 777777"),
 
                 new Employee("Тестовый сотрудник8", new DateTime(1980, 9, 6), //44
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 888888"),
 
                 new Employee("Тестовый сотрудник9", new DateTime(1999, 9, 6), //25
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 999999"),
             };
 
             //Act
@@ -110,31 +110,31 @@ namespace BankSystem.App.Tests
             List<Employee> employees = new List<Employee>()
             {
                 new Employee("Тестовый сотрудник1", new DateTime(2006, 9, 6), //18
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 111111"),
 
                 new Employee("Тестовый сотрудник2", new DateTime(2005, 10, 19),//19
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 222222"),
 
                 new Employee("Тестовый сотрудник3", new DateTime(2000, 6, 14),//25
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 333333"),
 
                 new Employee("Тестовый сотрудник4", new DateTime(2004, 9, 5), //20
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 444444"),
 
                 new Employee("Тестовый сотрудник5", new DateTime(1999, 3, 12),//26
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 555555"),
 
                 new Employee("Тестовый сотрудник6", new DateTime(1990, 4, 30),//35
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 666666"),
 
                 new Employee("Тестовый сотрудник7", new DateTime(2000, 9, 11), //24
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 777777"),
 
                 new Employee("Тестовый сотрудник8", new DateTime(1980, 9, 6), //44
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 888888"),
 
                 new Employee("Тестовый сотрудник9", new DateTime(1999, 9, 6), //25
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 999999"),
             };
 
             //Act
@@ -157,31 +157,31 @@ namespace BankSystem.App.Tests
             List<Employee> employees = new List<Employee>()
             {
                 new Employee("Тестовый сотрудник1", new DateTime(2006, 9, 6), //18
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 111111"),
 
                 new Employee("Тестовый сотрудник2", new DateTime(2005, 10, 19),//19
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 222222"),
 
                 new Employee("Тестовый сотрудник3", new DateTime(2000, 6, 14),//25
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 333333"),
 
                 new Employee("Тестовый сотрудник4", new DateTime(2004, 9, 5), //20
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 444444"),
 
                 new Employee("Тестовый сотрудник5", new DateTime(1999, 3, 12),//26
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 555555"),
 
                 new Employee("Тестовый сотрудник6", new DateTime(1990, 4, 30),//35
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 666666"),
 
                 new Employee("Тестовый сотрудник7", new DateTime(2000, 9, 11), //24
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 777777"),
 
                 new Employee("Тестовый сотрудник8", new DateTime(1980, 9, 6), //44
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 888888"),
 
                 new Employee("Тестовый сотрудник9", new DateTime(1999, 9, 6), //25
-                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик")),
+                new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 999999"),
             };
 
             //Act

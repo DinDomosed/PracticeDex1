@@ -66,7 +66,10 @@ namespace BankSystem.App.Services
             Console.Write("Укажите должность нового сотрудника: ");
             string Post = Console.ReadLine();
 
-            Employee employee = new Employee(client.Id, client.FullName, client.Birthday, new EmployeeContract(dateStartWork, dateEndWork, Salary, Post));
+            Console.Write("Укажите серию и номер паспорта: ");
+            string passportNum = Console.ReadLine();
+
+            Employee employee = new Employee(client.Id, client.FullName, client.Birthday, new EmployeeContract(dateStartWork, dateEndWork, Salary, Post), passportNum);
 
             return employee;
         }

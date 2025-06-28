@@ -47,6 +47,11 @@ namespace BankSystem.Domain.Models
             Random random = new Random();
             return "4081" + random.Next(100000000, 999999999).ToString();
         }
+        public void EditAccount(Currency currency, decimal amount)
+        {
+            Currency = currency;
+            Amount = amount;
+        }
 
         public override string ToString()
         {
