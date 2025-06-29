@@ -125,6 +125,5 @@ namespace BankSystem.App.Tests
             //Assert
             Assert.Equal(result, 22);
         }
-
     }
 }

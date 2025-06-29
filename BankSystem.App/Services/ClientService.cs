@@ -30,7 +30,7 @@ namespace BankSystem.App.Services
             {
                 throw new PassportNumberNullOrWhiteSpaceException("Неккоректный ввод серии и номера паспорта");
             }
-            
+
 
             client.Accounts.Add(new Account(new Currency("USD", '$'), 0));
             _clientStorage.AddClientToStorage(client);
@@ -43,7 +43,7 @@ namespace BankSystem.App.Services
                 throw new ArgumentNullException("Ошибка: добавляемый лицевой счет не может быть null");
 
             if (!_clientStorage.AllBankClients.ContainsKey(client.Id))
-                throw new ArgumentException("Ошибка: такого клиента нет в базе");
+                throw new ClientNotFoundException("Ошибка: такого клиента нет в базе");
 
             _clientStorage.AllBankClients.TryGetValue(client.Id, out Client client1);
 
@@ -51,8 +51,10 @@ namespace BankSystem.App.Services
                 client1.Accounts.Add(account);
             return true;
         }
-        public bool EditingAccount(string fullName, string passportNumber, string accountNumber, string newCurrencyCode, char newCurrencySymbol, decimal newAmount)
+        public bool EditingAccount(Guid Id , string fullName, string passportNumber, string accountNumber, string newCurrencyCode, char newCurrencySymbol, decimal newAmount)
         {
+            if(Id == Guid.Empty)
+                throw new ArgumentNullException("Ошибка: пуйстой Id");
             if (string.IsNullOrWhiteSpace(passportNumber))
                 throw new PassportNumberNullOrWhiteSpaceException("Паспорт не должен быть пустым");
             if (string.IsNullOrWhiteSpace(fullName))
@@ -66,7 +68,7 @@ namespace BankSystem.App.Services
             if (newAmount < 0)
                 throw new ArgumentOutOfRangeException("Баланс не может быть отрицательным");
 
-            var clientPair = _clientStorage.AllBankClients.FirstOrDefault(u => u.Value.FullName == fullName && u.Value.PassportNumber == passportNumber);
+            var clientPair = _clientStorage.AllBankClients.FirstOrDefault(u => u.Key == Id && u.Value.FullName == fullName && u.Value.PassportNumber == passportNumber);
             if (clientPair.Equals(default(KeyValuePair<Guid, Client>)))
                 throw new ClientNotFoundException("Клиент с такими данными не найден");
 
@@ -77,9 +79,9 @@ namespace BankSystem.App.Services
             return true;
         }
 
-        public List<Client> GetFilterClients(string? fullName, string? phoneNumber, string? passportNumber, DateTime? fromThisDate, DateTime beforeThisDate)
-        {  
-            var clients = _clientStorage.AllBankClients.Values.AsQueryable();
+        public List<Client> GetFilterClients(string? fullName = null, string? phoneNumber = null, string? passportNumber = null, DateTime? fromThisDate = null, DateTime? beforeThisDate = null)
+        {
+            var clients = _clientStorage.AllBankClients.Values;
 
             if (!string.IsNullOrWhiteSpace(fullName))
                 clients = clients.Where(u => u.FullName.Contains(fullName, StringComparison.OrdinalIgnoreCase));
@@ -90,16 +92,12 @@ namespace BankSystem.App.Services
             if (!string.IsNullOrWhiteSpace(passportNumber))
                 clients = clients.Where(u => u.PassportNumber == passportNumber);
 
-            if (fromThisDate != null)
+            if (fromThisDate.HasValue)
                 clients = clients.Where(u => u.Birthday >= fromThisDate);
 
-            if (beforeThisDate != null)
-            {
-                if (fromThisDate != null && beforeThisDate > fromThisDate)
-                    clients = clients.Where(u => u.Birthday <= beforeThisDate && u.Birthday >= fromThisDate);
-                else
-                    clients = clients.Where(u => u.Birthday <= beforeThisDate);
-            }
+            if (beforeThisDate.HasValue)
+                clients = clients.Where(u => u.Birthday <= beforeThisDate);
+
 
             return clients.ToList();
         }

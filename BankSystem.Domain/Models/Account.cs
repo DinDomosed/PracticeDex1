@@ -15,12 +15,13 @@ namespace BankSystem.Domain.Models
         public string AccountNumber { get; private set; }
 
 
-        public Account (Currency currency, decimal amount)
+        public Account (Currency currency, decimal amount, string? accountNumber = null)
         {
             Currency = currency;
             Amount = amount;
-            AccountNumber = GenerateAccountNumber();
+            AccountNumber = accountNumber ?? GenerateAccountNumber();
         }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged (string propertyName)

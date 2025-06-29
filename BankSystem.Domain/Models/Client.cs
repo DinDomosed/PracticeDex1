@@ -13,21 +13,27 @@ namespace BankSystem.Domain.Models
         public string PhoneNumber { get; private set; }
         public string PassportNumber { get; private set; }
         public DateTime RegistrationDate { get; private set; }
-        public Client(string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber, Account account) : base(FullName, birthday)
+        public Client(string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber, Account? account = null) : base(FullName, birthday)
         {
             Email = email;
             PhoneNumber = phoneNumber;
             PassportNumber = passportNumber;
             RegistrationDate = DateTime.Now;
-            Accounts.Add(account);
+            if (account != null)
+            {
+                Accounts.Add(account);
+            }
         }
-        public Client(Guid Id, string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber, Account account) : base(Id, FullName, birthday)
+        public Client(Guid Id, string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber, Account? account = null) : base(Id, FullName, birthday)
         {
             Email = email;
             PhoneNumber = phoneNumber;
             PassportNumber = passportNumber;
             RegistrationDate = DateTime.Now;
-            Accounts.Add(account);
+            if (account != null)
+            {
+                Accounts.Add(account);
+            }
         }
         public override string ToString()
         {
