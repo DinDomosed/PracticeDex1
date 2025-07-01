@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BankSystem.App\BankSystem.App.csproj" />
     <ProjectReference Include="..\BankSystem.Domain\BankSystem.Domain.csproj" />
   </ItemGroup>
 

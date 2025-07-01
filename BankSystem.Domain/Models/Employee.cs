@@ -11,6 +11,8 @@ namespace BankSystem.Domain.Models
         public EmployeeContract ContractEmployee {  get; private set; }
         public string PassportNumber { get; private set; }
 
+        public Client? ClientProfile {  get; private set; }
+
         public Employee (string FullName, DateTime Birthday, EmployeeContract contract, string passportNumber) : base (FullName, Birthday)
         {
             ContractEmployee = contract;
@@ -20,6 +22,11 @@ namespace BankSystem.Domain.Models
         {
             ContractEmployee = contract;
             PassportNumber = passportNumber;
+        }
+
+        public void CreateClientProfile(string email, string phoneNumber)
+        {
+            ClientProfile = new Client(Id, FullName, Birthday, email, phoneNumber, PassportNumber);
         }
 
         public void SetContract (EmployeeContract contract)

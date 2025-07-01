@@ -4,8 +4,8 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using BankSystem.App.Interfaces;
 using BankSystem.App.Services;
-using BankSystem.Data.Storages;
 using BankSystem.Domain.Models;
 using Bogus;
 
@@ -18,35 +18,45 @@ namespace BankSystem.App.Tests
         public void AddClientToStorageTest_Count_11()
         {
             //Arrange
-            ClientStorage clientStorage = new ClientStorage();
+            IClientStorage fakeClientStorage = new FakeClientStorage(); 
             TestDataGenerator generator = new TestDataGenerator();
 
             //Act
             var testListClient = generator.GenerateTestListClients(10);
             foreach (var client in testListClient)
             {
-                clientStorage.AddClientToStorage(client);
+                fakeClientStorage.Add(client);
             }
 
+
             //Assert 
-            Assert.Equal(11, clientStorage.AllBankClients.Count);
+            Assert.Equal(11, fakeClientStorage.Get().Count);
         }
 
         [Fact]
         public void GetYoungestClientFromStorageClient()
         {
             //Arrange
-            ClientStorage clientStorage = new ClientStorage();
+            IClientStorage fakeClientStorage = new FakeClientStorage();
             TestDataGenerator generator = new TestDataGenerator();
 
             Client clientTest = new Client("Тестовый самый молодой клиент", new DateTime(2020, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
                 new Account(new Currency("USD", '$'), 2400));
-            clientStorage.AddClientToStorage(clientTest);
+            fakeClientStorage.Add(clientTest);
+
+            var testGenerateClients = generator.GenerateTestListClients(10);
+            foreach (var client in testGenerateClients)
+            {
+                fakeClientStorage.Add(client);
+            }
+
 
             //Act
-            var youngestClient = clientStorage.AllBankClients.OrderBy(u => u.Value.Birthday).LastOrDefault();
-            bool resultEqualBirthday = youngestClient.Value.Birthday.Equals(new DateTime(2020, 11, 2));
-            bool resultEqualFullName = youngestClient.Value.FullName.Equals("Тестовый самый молодой клиент");
+
+            var youngestClient = fakeClientStorage.Get().OrderBy(u => u.Birthday).LastOrDefault();
+
+            bool resultEqualBirthday = youngestClient.Birthday.Equals(new DateTime(2020, 11, 2));
+            bool resultEqualFullName = youngestClient.FullName.Equals("Тестовый самый молодой клиент");
 
             //Assert
             Assert.NotNull(youngestClient);
@@ -58,15 +68,17 @@ namespace BankSystem.App.Tests
         public void GetOldestClientFromStorageClient()
         {
             //Arrange
-            ClientStorage clientStorage = new ClientStorage();
+            IClientStorage fakeClientStorage = new FakeClientStorage();
             TestDataGenerator generator = new TestDataGenerator();
-            clientStorage.AddClientToStorage(new Client("Тестовый клиент", new DateTime(2016, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
+
+            fakeClientStorage.Add(new Client("Тестовый клиент", new DateTime(1950, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
                 new Account(new Currency("USD", '$'), 1000)));
 
+            var testGenerateClients = generator.GenerateTestListClients(10);
             //Act
-            var olderClient = clientStorage.AllBankClients.OrderBy(u => u.Value.Birthday).First();
-            bool resultEqualBirthday = olderClient.Value.Birthday.Equals(new DateTime(2016, 11, 2));
-            bool resultEqualFullName = olderClient.Value.FullName.Equals("Тестовый клиент");
+            var olderClient = fakeClientStorage.Get().OrderBy(u => u.Birthday).First();
+            bool resultEqualBirthday = olderClient.Birthday.Equals(new DateTime(1950, 11, 2));
+            bool resultEqualFullName = olderClient.FullName.Equals("Тестовый клиент");
 
             //Assert
             Assert.True(resultEqualFullName);
@@ -112,15 +124,15 @@ namespace BankSystem.App.Tests
                 new Account(new Currency("USD", '$'), 1000)), //44
         });
 
-            ClientStorage clientStorage = new ClientStorage();
+            IClientStorage fakeClientStorage = new FakeClientStorage();
             foreach (var client in clientList)
             {
-                clientStorage.AddClientToStorage(client);
+                fakeClientStorage.Add(client);
             }
 
             //Act
-            int sumAge = clientStorage.AllBankClients.Sum(c => c.Value.Age);
-            int result = sumAge / clientStorage.AllBankClients.Count; //22
+            int sumAge = fakeClientStorage.Get().Sum(c => c.Age);
+            int result = sumAge / fakeClientStorage.Get().Count; //22
 
             //Assert
             Assert.Equal(result, 22);

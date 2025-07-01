@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BankSystem.Domain.Models;
 using BankSystem.App.Interfaces;
+using BankSystem.Domain.Models;
 
-
-namespace BankSystem.Data.Storages
+namespace BankSystem.App.Tests
 {
-    public class ClientStorage : IClientStorage
+    public class FakeClientStorage  : IClientStorage
     {
         private Dictionary<Guid, Client> _allBankClients = new Dictionary<Guid, Client>();
         public IReadOnlyDictionary<Guid, Client> AllBankClients => _allBankClients;
@@ -35,7 +34,7 @@ namespace BankSystem.Data.Storages
         public bool Update(Client client)
         {
             if (client == null)
-                return false;   
+                return false;
             if (!_allBankClients.ContainsKey(client.Id))
                 return false;
 
@@ -57,7 +56,7 @@ namespace BankSystem.Data.Storages
         public bool AddAccount(Guid clientId, Account account)
         {
             if (!_allBankClients.ContainsKey(clientId))
-                return false;  
+                return false;
 
             if (account == null)
                 return false;

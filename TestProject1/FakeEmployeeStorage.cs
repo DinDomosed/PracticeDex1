@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 using BankSystem.App.Interfaces;
 using BankSystem.Domain.Models;
 
-namespace BankSystem.Data.Storages
+namespace BankSystem.App.Tests
 {
-    public class EmployeeStorage : IEmployeeStorage
+    public class FakeEmployeeStorage : IEmployeeStorage
     {
         private Dictionary<Guid, Employee> _allEmployeeBank = new Dictionary<Guid, Employee>();
         public IReadOnlyDictionary<Guid, Employee> AllEmployeeBank => _allEmployeeBank;
 
 
-        public List<Employee> Get (Func<Employee, bool>? predicate = null)
+        public List<Employee> Get(Func<Employee, bool>? predicate = null)
         {
             var employees = _allEmployeeBank.Values.ToList();
 
-            if(predicate != null)
+            if (predicate != null)
                 employees = employees.Where(predicate).ToList();
 
             return employees;
@@ -38,7 +38,7 @@ namespace BankSystem.Data.Storages
             if (employee == null)
                 return false;
 
-            if(!_allEmployeeBank.ContainsKey(employee.Id))
+            if (!_allEmployeeBank.ContainsKey(employee.Id))
                 return false;
 
             _allEmployeeBank[employee.Id] = employee;
@@ -59,7 +59,7 @@ namespace BankSystem.Data.Storages
             if (!_allEmployeeBank.ContainsKey(employeeId))
                 return false;
 
-            if(newEmployeeContract == null)
+            if (newEmployeeContract == null)
                 return false;
 
             _allEmployeeBank[employeeId].SetContract(newEmployeeContract);
@@ -68,11 +68,11 @@ namespace BankSystem.Data.Storages
 
         public bool CreateAccount(Guid employeeId, Account account, string email, string phoneNumber)
         {
-            if(!_allEmployeeBank.ContainsKey(employeeId))
+            if (!_allEmployeeBank.ContainsKey(employeeId))
                 return false;
             if (account == null)
                 return false;
-            if(string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phoneNumber))
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phoneNumber))
                 return false;
 
             _allEmployeeBank[employeeId].CreateClientProfile(email, phoneNumber);
