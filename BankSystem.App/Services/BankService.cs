@@ -1,75 +1,77 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using BankSystem.App.Events;
+using BankSystem.App.Exceptions;
 using BankSystem.Domain.Models;
 
 namespace BankSystem.App.Services
 {
     public class BankService
     {
-        public void CalculateOwnerSalaries(List<Employee> employees, decimal BankProfit, decimal BankExpenses)
+        private readonly EmployeeService _employeeService;
+        public BankService(EmployeeService employeeService)
         {
+            _employeeService = employeeService;
+        }
+
+
+        public event EventHandler<NoProfitEventArgs>? ThereIsNoProfit;
+        public event EventHandler<OwnersSalariesEventArgs>? ThereIsSalariesOwners;
+
+        protected virtual void OnThereIsNoProfit(decimal netProfit)
+        {
+            ThereIsNoProfit?.Invoke(this, new NoProfitEventArgs(netProfit));
+        }
+
+        protected virtual void OnThereIsSalariesOwners(Employee owner, decimal salary)
+        {
+            ThereIsSalariesOwners?.Invoke(this, new OwnersSalariesEventArgs(owner, salary));
+        }
+
+        public void CalculateOwnerSalaries(List<Employee> employees, decimal bankProfit, decimal bankExpenses)
+        {
+            
             var Owners = employees.Where(e => e.ContractEmployee.Post == "Владелец").ToList();
             if (Owners.Count == 0)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Ошибка: Владельцы не найдены");
-                Console.ResetColor();
+                throw new EmployeeNotFoundException("Ошибка: Владельцы не найдены");           
             }
-            decimal NetProfit = BankProfit - BankExpenses;
+
+            decimal NetProfit = bankProfit - bankExpenses;
             decimal SalaryForOneOwner;
+
             if (NetProfit < 0)
             {
-                Console.WriteLine("У банка нет прибыли . Зарплата владельцам не выдана");
+                OnThereIsNoProfit(NetProfit);
             }
+
             else if (NetProfit > 0)
             {
                 SalaryForOneOwner = (decimal)(NetProfit / Owners.Count);
                 foreach (var Owner in Owners)
                 {
                     Owner.ContractEmployee.SetSalaryForOwner(SalaryForOneOwner);
-                    Console.WriteLine($"Владельцу {Owner.FullName} начислена запралата {SalaryForOneOwner:C}");
+                    OnThereIsSalariesOwners(Owner, SalaryForOneOwner);
                 }
             }
         }
-        public Employee ConvertClientToEmployee(Client client)
+        public Employee ConvertClientToEmployeeAndAddToStorage(Client client, DateTime dateStartWork, DateTime dateEndWork, decimal salary, string post)
         {
-            Console.WriteLine($"Для принятия на работу клиента {client.FullName} необходимо внести следующие данные: ");
+            if(client == null)
+                throw new ArgumentNullException(nameof(client), "Ошибка: Клиент не может быть null");
+            if (dateStartWork.Equals(default(DateTime)) || dateEndWork.Equals(default(DateTime)))
+                throw new ArgumentNullException("Ошибка: Некорректный ввод дат");
+            if(salary <= 0)
+                throw new ArgumentNullException("Ошибка: Некорректный ввод зарплаты");
+            if(string.IsNullOrWhiteSpace(post))
+                throw new ArgumentNullException(nameof(post));
 
-            Console.Write($"Введите дату заключения контракта (гггг-мм-дд): ");
-
-            if (!DateTime.TryParse(Console.ReadLine(), out DateTime dateStartWork))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Ошибка: неверная дата");
-                Console.ResetColor();
-            }
-
-            Console.Write("Введите дату окончания контракта: ");
-            if (!DateTime.TryParse(Console.ReadLine(), out DateTime dateEndWork))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Ошибка: неверная дата");
-                Console.ResetColor();
-            }
-
-            Console.Write("Укажите зарплату нового сотрудника:");
-            if (!Decimal.TryParse(Console.ReadLine(), out Decimal Salary))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Ошибка: неверный формат ввода");
-                Console.ResetColor();
-            }
-
-            Console.Write("Укажите должность нового сотрудника: ");
-            string Post = Console.ReadLine();
-
-            Console.Write("Укажите серию и номер паспорта: ");
-            string passportNum = Console.ReadLine();
-
-            Employee employee = new Employee(client.Id, client.FullName, client.Birthday, new EmployeeContract(dateStartWork, dateEndWork, Salary, Post), passportNum);
+            Employee employee = new Employee(client.Id, client.FullName, client.Birthday, new EmployeeContract(dateStartWork, dateEndWork, salary, post), client.PassportNumber);
+            _employeeService.AddEmployee(employee);
 
             return employee;
         }
