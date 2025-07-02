@@ -12,6 +12,7 @@ namespace BankSystem.App.Services
 {
     public class BankService
     {
+        protected readonly List<Person> BlackList = new List<Person>();
         private readonly EmployeeService _employeeService;
         public BankService(EmployeeService employeeService)
         {
@@ -26,10 +27,37 @@ namespace BankSystem.App.Services
         {
             ThereIsNoProfit?.Invoke(this, new NoProfitEventArgs(netProfit));
         }
-
         protected virtual void OnThereIsSalariesOwners(Employee owner, decimal salary)
         {
             ThereIsSalariesOwners?.Invoke(this, new OwnersSalariesEventArgs(owner, salary));
+        }
+
+        public bool AddBonus<T>(T person, decimal amount) where T : Person
+        {
+            if (person == null)
+                throw new ArgumentNullException(nameof(person), "Ошибка: Persone не может быть null");
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(amount), "Ошибка: Сумма бонуса не может быть меньше 0");
+
+            person.AddBonus(amount);
+            return true;
+        }
+        public bool AddToBlackList<T> (T person) where T : Person
+        {
+            if (person == null)
+                throw new ArgumentNullException(nameof(person), "Ошибка: Невозможно null person добавить в черный список");
+            if(BlackList.Contains(person))
+                throw new InvalidOperationException("Ошибка: Person уже есть в BlackList");
+
+            BlackList.Add(person);
+            return true;
+        }
+        public bool IsPersonInBlackList<T> (T person) where T : Person
+        {
+            if (person == null)
+                throw new ArgumentNullException("Ошибка: Невозможно проверить null");
+
+            return BlackList.Contains(person);
         }
 
         public void CalculateOwnerSalaries(List<Employee> employees, decimal bankProfit, decimal bankExpenses)

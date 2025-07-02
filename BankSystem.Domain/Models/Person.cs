@@ -24,6 +24,12 @@ namespace BankSystem.Domain.Models
                 return age;
             }  
         }
+
+        public decimal? Bonus { get; private set; }
+        public virtual void AddBonus(decimal amount)
+        {
+            Bonus += amount;
+        }
         public Person(string FullName, DateTime Birthday)
         {
             this.FullName = FullName;
@@ -36,6 +42,21 @@ namespace BankSystem.Domain.Models
             this.Id = Id;
             this.FullName = FullName;
             this.Birthday = Birthday;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if(obj == null) 
+                return false;
+            if(obj is not Person person) 
+                return false;
+
+            return  Id == person.Id && FullName == person.FullName && Birthday == person.Birthday;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, FullName, Birthday);
         }
     }
 }
