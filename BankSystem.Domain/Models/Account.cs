@@ -10,9 +10,15 @@ namespace BankSystem.Domain.Models
 {
     public class Account : INotifyPropertyChanged
     {
-        public Currency Currency { get; private set; }
         public decimal Amount { get; private set; }
         public string AccountNumber { get; private set; }
+        public Guid Id { get; private set; } = Guid.NewGuid();
+
+        //For EF
+        public Currency Currency { get; private set; } = null!;
+        public string CurrencyCode { get; private set; }
+        public Guid IdClient { get; private set; }
+        public Client Client { get; private set; }
 
 
         public Account (Currency currency, decimal amount, string? accountNumber = null)

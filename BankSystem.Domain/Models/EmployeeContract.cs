@@ -10,11 +10,16 @@ namespace BankSystem.Domain.Models
     public class EmployeeContract
     {
         public DateTime StartOfWork { get; private set; }
-        public DateTime EndOfContract { get; private set; }
+        public DateTime? EndOfContract { get; private set; }
         public decimal Salary { get; private set; }
         public string Post { get; private set; }
+        public Guid Id { get; private set; } = Guid.NewGuid();
 
-        public EmployeeContract(DateTime startOfWork, DateTime EndOfContract, decimal Salary, string Post)
+        // For EF
+        public Guid EmployeeId { get; private set; }
+        public Employee Employee { get; private set; } = null!;
+
+        public EmployeeContract(DateTime startOfWork, DateTime? EndOfContract, decimal Salary, string Post)
         {
             StartOfWork = startOfWork;
             this.EndOfContract = EndOfContract;

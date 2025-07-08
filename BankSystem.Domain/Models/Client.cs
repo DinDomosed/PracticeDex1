@@ -13,6 +13,10 @@ namespace BankSystem.Domain.Models
         public string PhoneNumber { get; private set; }
         public string PassportNumber { get; private set; }
         public DateTime RegistrationDate { get; private set; }
+
+        // For EF
+        public Employee? EmployeeProfile { get; private set; } = null!;
+
         public Client(string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber, Account? account = null) : base(FullName, birthday)
         {
             Email = email;

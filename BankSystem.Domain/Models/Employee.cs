@@ -8,10 +8,12 @@ namespace BankSystem.Domain.Models
 {
     public class Employee : Person
     {
-        public EmployeeContract ContractEmployee {  get; private set; }
+        public EmployeeContract ContractEmployee {  get; private set; } = null!;
         public string PassportNumber { get; private set; }
 
-        public Client? ClientProfile {  get; private set; }
+        // For EF
+        public Client? ClientProfile { get; private set; } = null!;
+        public Guid ClientId { get; private set; }
 
         public Employee (string FullName, DateTime Birthday, EmployeeContract contract, string passportNumber) : base (FullName, Birthday)
         {
