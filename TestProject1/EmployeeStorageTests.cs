@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BankSystem.App.DTOs;
 using BankSystem.App.Interfaces;
 using BankSystem.Domain.Models;
 
@@ -50,9 +51,10 @@ namespace BankSystem.App.Tests
             {
                 fakeEmployeeStorage.Add(employee);
             }
+            ClientFilterDTO filter = new ClientFilterDTO();
 
             //Assert
-            Assert.Equal(9, fakeEmployeeStorage.Get().Count);
+            Assert.Equal(9, fakeEmployeeStorage.GetAll().Count());
         }
 
         [Fact]
@@ -95,7 +97,7 @@ namespace BankSystem.App.Tests
             {
                 fakeEmployeeStorage.Add(employee);
             }
-            var youngestEmployee = fakeEmployeeStorage.Get().OrderBy(u => u.Birthday).LastOrDefault();
+            var youngestEmployee = fakeEmployeeStorage.GetAll().OrderBy(u => u.Birthday).LastOrDefault();
 
             //Assert
             Assert.NotNull(youngestEmployee);
@@ -142,7 +144,7 @@ namespace BankSystem.App.Tests
             {
                 fakeEmployeeStorage.Add(employee);
             }
-            var olderEmployee = fakeEmployeeStorage.Get().OrderBy(u => u.Birthday).First();
+            var olderEmployee = fakeEmployeeStorage.GetAll().OrderBy(u => u.Birthday).First();
 
             //Assert
             Assert.NotNull(olderEmployee);
@@ -189,8 +191,8 @@ namespace BankSystem.App.Tests
             {
                 fakeEmployeeStorage.Add(employee);
             }
-            int sumAge = fakeEmployeeStorage.Get().Sum(u => u.Age);
-            int result = sumAge / fakeEmployeeStorage.Get().Count();
+            int sumAge = fakeEmployeeStorage.GetAll().Sum(u => u.Age);
+            int result = sumAge / fakeEmployeeStorage.GetAll().Count();
 
             //Assert
             Assert.Equal(26, result);

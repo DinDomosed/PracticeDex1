@@ -5,6 +5,8 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using BankSystem.App.Common;
+using BankSystem.App.DTOs;
 using BankSystem.App.Exceptions;
 using BankSystem.App.Interfaces;
 using BankSystem.Domain.Models;
@@ -19,8 +21,27 @@ namespace BankSystem.App.Services
         {
             _clientStorage = clientStorage;
         }
+        public Client? Get(Guid id)
+        {
+            if (id == Guid.Empty)
+                throw new ArgumentNullException(nameof(id), "Ошибка: Некорректный ID ");
+
+            return _clientStorage.Get(id);
+        }
+
+        public List<Client> GetAll()
+        {
+            return _clientStorage.GetAll();
+        }
+
         public bool AddClient(Client client)
         {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client), "Ошибка: Клиент не может быть null");
+
+            if (_clientStorage.Exists(client.Id, client.PassportNumber))
+                throw new ArgumentException(nameof(client), "Клиент уже зарегестрирован");
+                
             int minAgeLimit = 18;
 
             if (client.Age < minAgeLimit)
@@ -32,16 +53,19 @@ namespace BankSystem.App.Services
                 throw new PassportNumberNullOrWhiteSpaceException("Некорректный ввод серии и номера паспорта");
             }
 
-
-            client.Accounts.Add(new Account(new Currency("USD", '$'), 0)); 
             return _clientStorage.Add(client);
         }
-        public bool UpdateClient(Client client)
+        public bool UpdateClient(Guid idClient, Client client)
         {
-            if(client == null)
+            if (idClient == Guid.Empty)
+                throw new ArgumentNullException(nameof(idClient), "Ошибка: Некорректный ID");
+
+            if (client == null)
                 throw new ArgumentNullException(nameof(client), "Ошибка: Клиент не может быть null");
 
-            if (!_clientStorage.Get().Any(u => u.Id == client.Id))
+            var foundClient = _clientStorage.Get(idClient);
+
+            if (foundClient == null)
                 throw new ClientNotFoundException("Ошибка: Клиент не найден");
 
             if (client.Age < 18)
@@ -51,81 +75,83 @@ namespace BankSystem.App.Services
                 throw new PassportNumberNullOrWhiteSpaceException("Ошибка: Неккоректный ввод серии и номера паспорта");
 
             if (string.IsNullOrWhiteSpace(client.PhoneNumber))
-                throw new ArgumentNullException("Ошибка: Некорректный номер телефона");
+                throw new ArgumentException("Ошибка: Некорректный номер телефона");
 
-            return _clientStorage.Update(client);
+            return _clientStorage.Update(idClient, client);
         }
-        public bool DeleteClient(Client client)
+        public bool DeleteClient(Guid id)
         {
-            if (client == null)
-                throw new ArgumentNullException("Ошибка: Клиент не может быть null");
-            if (!_clientStorage.Get().Any(u => u.Id == client.Id))
+            if (id == Guid.Empty)
+                throw new ArgumentNullException("Ошибка: Некорректный ID");
+
+            var foundClient = _clientStorage.Get(id);
+
+            if (foundClient == null)
                 throw new ClientNotFoundException("Ошибка: Клиент не найден");
 
-            return _clientStorage.Delete(client);
+            return _clientStorage.Delete(foundClient.Id);
         }
 
-        public bool AddAccountForActiveClient(Account newAccount, Client client)
+        public bool AddAccountToClient(Guid clientID, Account newAccount)
         {
             if (newAccount == null)
                 throw new ArgumentNullException("Ошибка: добавляемый лицевой счет не может быть null");
-            var clientStorage = _clientStorage.Get(u => u.Id == client.Id);
 
-            if (!clientStorage.Any(u => u.Id == client.Id))
+            var clientStorage = _clientStorage.Get(clientID);
+
+            if (clientStorage == null)
                 throw new ClientNotFoundException("Ошибка: такого клиента нет в базе");
 
-            
-            return _clientStorage.AddAccount(client.Id, newAccount);
+
+            return _clientStorage.AddAccount(clientStorage.Id, newAccount);
         }
-        public bool UpdateAccount(Guid IdClient , string accountNumber, Account newAccount)
+        public bool UpdateAccount(Guid IdClient, string accountNumber, Account newAccount)
         {
-            var client =_clientStorage.Get(u => u.Id == IdClient).FirstOrDefault()
+            var client = _clientStorage.Get(IdClient)
                 ?? throw new ClientNotFoundException("Ошибка: клиент не найден");
 
             if (string.IsNullOrWhiteSpace(accountNumber))
-                throw new ArgumentNullException("Ошибка: некорректный номер счета");
+                throw new ArgumentException("Ошибка: некорректный номер счета");
 
             if (!client.Accounts.Any(u => u.AccountNumber == accountNumber))
                 throw new AccountNotFoundException("Ошибка: счет не найден");
 
-            if(newAccount == null)
+            if (newAccount == null)
                 throw new ArgumentNullException("Ошибка: cчет не может быть null");
 
             return _clientStorage.UpdateAccount(IdClient, accountNumber, newAccount);
         }
-        public bool DeleteAccount(Guid IdClient , string accountNumber)
+        public bool DeleteAccount(Guid IdClient, string accountNumber)
         {
-            if (!_clientStorage.Get().Any(u => u.Id == IdClient))
+            if (IdClient == Guid.Empty)
+                throw new ArgumentNullException(nameof(IdClient), "Ошибка: Некорректный ID");
+
+            var foundClient = _clientStorage.Get(IdClient);
+
+            if (foundClient == null)
                 throw new ClientNotFoundException("Ошибка: Клиент не найден");
 
             if (string.IsNullOrWhiteSpace(accountNumber))
-                throw new ArgumentNullException("Ошибка: номер счета не может быть null");
+                throw new ArgumentNullException("Ошибка: Некорректный номер счета");
+
+            var foundAccount = foundClient.Accounts.FirstOrDefault(c => c.AccountNumber == accountNumber);
+
+            if (foundAccount == null)
+                throw new AccountNotFoundException("Ошибка: У клиента нет аккаунта с таким номером");
 
             return _clientStorage.DeleteAccount(IdClient, accountNumber);
 
         }
 
-        public List<Client> GetFilterClients(string? fullName = null, string? phoneNumber = null, string? passportNumber = null, DateTime? fromThisDate = null, DateTime? beforeThisDate = null)
+        public PagedResult<Client> GetFilterClients(ClientFilterDTO filter, int page, int pageSize = 10)
         {
-            var clients = _clientStorage.Get();
+            if (page.Equals(default(int)))
+                throw new ArgumentException(nameof(page), "Ошибка страницы");
 
-            if (!string.IsNullOrWhiteSpace(fullName))
-                clients = clients.Where(u => u.FullName.Contains(fullName, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (pageSize.Equals(default(int)))
+                throw new ArgumentException(nameof(pageSize), "Ошибка: некорректный размер страницы");
 
-            if (!string.IsNullOrWhiteSpace(phoneNumber))
-                clients = clients.Where(u => u.PhoneNumber == phoneNumber).ToList();
-
-            if (!string.IsNullOrWhiteSpace(passportNumber))
-                clients = clients.Where(u => u.PassportNumber == passportNumber).ToList();
-
-            if (fromThisDate.HasValue)
-                clients = clients.Where(u => u.Birthday >= fromThisDate).ToList();
-
-            if (beforeThisDate.HasValue)
-                clients = clients.Where(u => u.Birthday <= beforeThisDate).ToList();
-
-
-            return clients.ToList();
+            return _clientStorage.GetFilterClients(filter, page, pageSize);
         }
     }
 }

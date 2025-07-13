@@ -30,6 +30,7 @@ namespace BankSystem.Domain.Models
         {
             Bonus += amount;
         }
+        protected Person() { }
         public Person(string FullName, DateTime Birthday)
         {
             this.FullName = FullName;

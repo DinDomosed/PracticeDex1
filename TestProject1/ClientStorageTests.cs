@@ -30,7 +30,7 @@ namespace BankSystem.App.Tests
 
 
             //Assert 
-            Assert.Equal(11, fakeClientStorage.Get().Count);
+            Assert.Equal(11, fakeClientStorage.GetAll().Count);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace BankSystem.App.Tests
 
             //Act
 
-            var youngestClient = fakeClientStorage.Get().OrderBy(u => u.Birthday).LastOrDefault();
+            var youngestClient = fakeClientStorage.GetAll().OrderBy(u => u.Birthday).LastOrDefault();
 
             bool resultEqualBirthday = youngestClient.Birthday.Equals(new DateTime(2020, 11, 2));
             bool resultEqualFullName = youngestClient.FullName.Equals("Тестовый самый молодой клиент");
@@ -76,7 +76,7 @@ namespace BankSystem.App.Tests
 
             var testGenerateClients = generator.GenerateTestListClients(10);
             //Act
-            var olderClient = fakeClientStorage.Get().OrderBy(u => u.Birthday).First();
+            var olderClient = fakeClientStorage.GetAll().OrderBy(u => u.Birthday).First();
             bool resultEqualBirthday = olderClient.Birthday.Equals(new DateTime(1950, 11, 2));
             bool resultEqualFullName = olderClient.FullName.Equals("Тестовый клиент");
 
@@ -131,8 +131,8 @@ namespace BankSystem.App.Tests
             }
 
             //Act
-            int sumAge = fakeClientStorage.Get().Sum(c => c.Age);
-            int result = sumAge / fakeClientStorage.Get().Count; //22
+            int sumAge = fakeClientStorage.GetAll().Sum(c => c.Age);
+            int result = sumAge / fakeClientStorage.GetAll().Count; //22
 
             //Assert
             Assert.Equal(result, 22);

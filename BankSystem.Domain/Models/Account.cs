@@ -19,6 +19,7 @@ namespace BankSystem.Domain.Models
         public string CurrencyCode { get; private set; }
         public Guid IdClient { get; private set; }
         public Client Client { get; private set; }
+        protected Account() { }
 
 
         public Account (Currency currency, decimal amount, string? accountNumber = null)

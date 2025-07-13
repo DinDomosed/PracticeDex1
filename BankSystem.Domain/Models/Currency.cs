@@ -13,6 +13,7 @@ namespace BankSystem.Domain.Models
 
         // For EF
         public List<Account> Accounts { get; private set; } = null!;
+        protected Currency() { }
 
         public Currency(string code, char symbol)
         {

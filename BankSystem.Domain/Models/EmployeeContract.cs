@@ -18,6 +18,7 @@ namespace BankSystem.Domain.Models
         // For EF
         public Guid EmployeeId { get; private set; }
         public Employee Employee { get; private set; } = null!;
+        protected EmployeeContract() { }
 
         public EmployeeContract(DateTime startOfWork, DateTime? EndOfContract, decimal Salary, string Post)
         {

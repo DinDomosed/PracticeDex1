@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using BankSystem.App.DTOs;
 using BankSystem.App.Exceptions;
 using BankSystem.App.Interfaces;
 using BankSystem.App.Services;
@@ -52,7 +53,7 @@ namespace BankSystem.App.Tests
 
 
             //Act 
-            var clients = FakeClientStorage.Get();
+            var clients = FakeClientStorage.GetAll();
             int result = clients.Count;
 
             //Assert
@@ -76,7 +77,7 @@ namespace BankSystem.App.Tests
             Client newDataClient = new Client(testId, "Тестовый клиент111", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
 
             //Act
-            clientService.UpdateClient(newDataClient);
+            clientService.UpdateClient(testId, newDataClient);
 
             //Assert
             Assert.NotEqual(testClient, newDataClient);
@@ -122,14 +123,14 @@ namespace BankSystem.App.Tests
                 clientService.AddClient(client);
             }
 
-            Client client1 = fakeClientStorage.Get(u => u.Id == testId).First();
+            Client client1 = fakeClientStorage.Get(testId);
 
             //Act
-            clientService.DeleteClient(client1);
-            bool result = fakeClientStorage.Get().Any(x => x.Id == testId);
+            clientService.DeleteClient(client1.Id);
+            bool result = fakeClientStorage.GetAll().Any(x => x.Id == testId);
 
             //Assert
-            Assert.Equal(9, fakeClientStorage.Get().Count);
+            Assert.Equal(9, fakeClientStorage.GetAll().Count);
             Assert.False(result);
 
         }
@@ -176,14 +177,14 @@ namespace BankSystem.App.Tests
 
 
             //Act 
-            Client clientTest = fakeClientStorage.Get(u => u.Id == testGuid).FirstOrDefault();
-            bool resaltOperation = clientService.AddAccountForActiveClient(newAccount, clientTest);
+            Client clientTest = fakeClientStorage.Get(testGuid);
+            bool resaltOperation = clientService.AddAccountToClient(clientTest.Id, newAccount);
 
 
             // Act & Assert
             Assert.Throws<ClientNotFoundException>(() =>
             {
-                clientService.AddAccountForActiveClient(newAccount, Fakeclient);
+                clientService.AddAccountToClient(Fakeclient.Id, newAccount);
             });
 
             //Assert
@@ -234,7 +235,7 @@ namespace BankSystem.App.Tests
             Account UpdateAcc = new Account(new Currency("EUR", '€'), 6000);
             bool result = clientService.UpdateAccount(testGuid, "111 111 111", UpdateAcc);
 
-            var client = fakeClientStorage.Get(u => u.Id == testGuid).FirstOrDefault();
+            var client = fakeClientStorage.Get(testGuid);
             client.Accounts.Sort((a, b) => a.Amount.CompareTo(b.Amount));
 
 
@@ -256,7 +257,7 @@ namespace BankSystem.App.Tests
 
             Client testClient = new Client(testId, "Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
             clientService.AddClient(testClient);
-            clientService.AddAccountForActiveClient(new Account(new Currency("USD", '$'), 4000, "123"), testClient);
+            clientService.AddAccountToClient(testClient.Id , new Account(new Currency("USD", '$'), 4000, "123"));
 
             //Act
             bool result = clientService.DeleteAccount(testClient.Id, "123");
@@ -300,11 +301,19 @@ namespace BankSystem.App.Tests
             foreach (var cl in clientList)
             {
                 clientService.AddClient(cl);
-            } 
+            }
 
 
             //Act
-            var filterClients = clientService.GetFilterClients(fullName: "Тестовый", fromThisDate: new DateTime(2000, 1, 1), beforeThisDate: new DateTime(2002, 1, 1));
+
+            ClientFilterDTO filter = new ClientFilterDTO
+            {
+                FullName = "Тестовый",
+                BirthDateFrom = new DateTime(2000, 1, 1),
+                BirthDateTo = new DateTime(2002, 1, 1)
+            };
+
+            var filterClients = clientService.GetFilterClients(filter, 1).Items;
 
 
             //Assert

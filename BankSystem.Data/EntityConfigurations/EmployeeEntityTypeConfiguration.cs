@@ -52,7 +52,6 @@ namespace BankSystem.Data.EntityConfigurations
                  .HasForeignKey<Employee>(c => c.ClientId)
                  .OnDelete(DeleteBehavior.Cascade);
 
-            
         }
     }
 }

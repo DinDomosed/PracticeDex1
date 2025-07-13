@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BankSystem.App.DTOs;
 using BankSystem.App.Exceptions;
 using BankSystem.App.Interfaces;
 using BankSystem.App.Services;
@@ -66,7 +67,7 @@ namespace BankSystem.App.Tests
 
             //Assert
             Assert.True(result);
-            Assert.Equal(9, fakeEmployeeStorage.Get().Count);
+            Assert.Equal(9, fakeEmployeeStorage.GetAll().Count);
         }
 
         [Fact]
@@ -111,13 +112,14 @@ namespace BankSystem.App.Tests
             {
                 employeeService.AddEmployee(emp);
             }
-            Employee employeeTest = fakeStorage.Get(u => u.Id == TestId).First();
+            Employee employeeTest = fakeStorage.Get(TestId);
 
 
             //Act 
             Employee newDataEmployee = new Employee(TestId, "Тестовый сотрудник1000", new DateTime(2000, 9, 6), 
                 new EmployeeContract(new DateTime(2025, 7, 1), new DateTime(2070, 7, 1), 5000, "Бекенд разработчик"), "4324 111111");
-            employeeService.UpdateEmployee(newDataEmployee);
+           
+            employeeService.UpdateEmployee(newDataEmployee.Id, newDataEmployee);
 
             //Assert
             Assert.NotEqual(employeeTest.FullName, newDataEmployee.FullName);
@@ -167,15 +169,15 @@ namespace BankSystem.App.Tests
                 employeeService.AddEmployee(emp);
             }
 
-            Employee deleteEmployee = fakeStorage.Get(u => u.Id == TestId).First();
+            Employee deleteEmployee = fakeStorage.Get(TestId);
 
 
             //Act
-            employeeService.DeleteEmployee(deleteEmployee);
-            bool result = fakeStorage.Get().Any(u => u.Id == TestId);
+            employeeService.DeleteEmployee(deleteEmployee.Id);
+            bool result = fakeStorage.GetAll().Any(u => u.Id == TestId);
 
             //Assert
-            Assert.Equal(8, fakeStorage.Get().Count);
+            Assert.Equal(8, fakeStorage.GetAll().Count);
             Assert.False(result);
         }
         [Fact]
@@ -220,14 +222,15 @@ namespace BankSystem.App.Tests
             {
                 employeeService.AddEmployee(employee);
             }
+            EmployeeContract newContract = new EmployeeContract(new DateTime(2020, 6, 24), new DateTime(3000, 1, 1), 3500, "Бекенд разработчик");
 
             //Act
-            employeeService.UpdateEmployeeContract(guidTest, "Тестовый сотрудник1", "4324 111111", newDateEndWork: new DateTime(3000, 1, 1), newSalary: 3500);
+            employeeService.UpdateEmployeeContract(guidTest, newContract);
 
             //Assert
-            Assert.Equal(new DateTime(3000, 1, 1), fakeEmployeeStorage.Get(u => u.Id == guidTest).First().ContractEmployee.EndOfContract);
-            Assert.Equal(3500, fakeEmployeeStorage.Get(u => u.Id == guidTest).First().ContractEmployee.Salary);
-            Assert.Equal("Тестовый сотрудник1", fakeEmployeeStorage.Get(u => u.Id == guidTest).First().FullName);
+            Assert.Equal(new DateTime(3000, 1, 1), fakeEmployeeStorage.Get(guidTest).ContractEmployee.EndOfContract);
+            Assert.Equal(3500, fakeEmployeeStorage.Get(guidTest).ContractEmployee.Salary);
+            Assert.Equal("Тестовый сотрудник1", fakeEmployeeStorage.Get(guidTest).FullName);
         }
 
         [Fact]
@@ -272,9 +275,23 @@ namespace BankSystem.App.Tests
                 employeeService.AddEmployee(employee);
             }
 
+
             //Act
-            List<Employee> filterEmployee = employeeService.GetFilterEmployee( fromThisSalary: 3000, beforeThisSalary: 7000);
-            var filterEmployee2 = employeeService.GetFilterEmployee(fromThisDateBirthday: new DateTime(2000, 1, 1), beforeThisDateBirthday: new DateTime(2007, 1, 1));
+            EmployeeFilterDTO filter1 = new EmployeeFilterDTO
+            {
+                SalaryFrom = 3000,
+                SalaryTo = 7000
+            };
+
+            EmployeeFilterDTO filter2 = new EmployeeFilterDTO
+            {
+                BirthDateFrom = new DateTime(2000, 1, 1),
+                BirthDateTo = new DateTime(2007, 1, 1)
+            };
+
+            List<Employee> filterEmployee = employeeService.GetFilterEmployee(filter1, 1 , 10).Items;
+            var filterEmployee2 = employeeService.GetFilterEmployee(filter2, 1).Items;
+
             filterEmployee = filterEmployee.OrderBy(u => u.ContractEmployee.Salary).ToList();
             filterEmployee2 = filterEmployee2.OrderBy(u => u.Birthday).ToList();
 
