@@ -31,7 +31,7 @@ namespace BankSystem.Data.EntityConfigurations
                 .HasColumnName("Birthday")
                 .HasColumnType("date")
                 .IsRequired();
-            builder.HasCheckConstraint("CK_Client_Age", "Birthday <= CURRENT_DATE - INTERVAL '18' YEAR");
+            builder.HasCheckConstraint("CK_Client_Age", "\"Birthday\" <= CURRENT_DATE - INTERVAL '18' year");
 
             builder.Property(b => b.Bonus)
                 .HasColumnName("Bonus")
