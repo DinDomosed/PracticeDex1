@@ -18,7 +18,13 @@ namespace BankSystem.Data.Storages
 {
     public class ClientDbStorage : IClientStorage
     {
-        private readonly BankSystemDbContext _dbContext = new BankSystemDbContext();  
+        private readonly BankSystemDbContext _dbContext;
+
+        public ClientDbStorage(BankSystemDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         public Client? Get(Guid Id)
         {
             if (Id == Guid.Empty)
@@ -42,19 +48,32 @@ namespace BankSystem.Data.Storages
         {
             if (client == null)
                 return false;
+
             if (_dbContext.Clients.Any(c => c.Id == client.Id || c.PassportNumber == client.PassportNumber))
                 return false;
 
-            Currency currency = _dbContext.Currencies.FirstOrDefault(c => c.Code == "USD");
+            // Проверяю, есть ли валюта в локальном трекинге
+            var currency = _dbContext.Currencies.Local.FirstOrDefault(c => c.Code == "USD");
 
+            // Если нет, ищу в базе данных
+            if (currency == null)
+                currency = _dbContext.Currencies.FirstOrDefault(c => c.Code == "USD");
+
+            // Если в БД нет, создаю и добавляю в БД
             if (currency == null)
             {
                 currency = new Currency("USD", '$');
                 _dbContext.Currencies.Add(currency);
             }
 
-            client.Accounts.Add(new Account(currency, 0));
+            //Если валюта есть в БД, но не не отслеживается - отслеживаю
+            else
+            {
+                if (_dbContext.Entry(currency).State == EntityState.Detached)
+                    _dbContext.Currencies.Attach(currency);
+            }
 
+            client.Accounts.Add(new Account(client.Id, currency, 0));
             _dbContext.Clients.Add(client);
             _dbContext.SaveChanges();
             return true;
@@ -72,6 +91,9 @@ namespace BankSystem.Data.Storages
                 return false;
 
             _dbContext.Entry(dbClient).CurrentValues.SetValues(upClient);
+
+            var entry = _dbContext.Entry(dbClient);
+
             _dbContext.SaveChanges();
             return true;
         }
@@ -83,6 +105,7 @@ namespace BankSystem.Data.Storages
 
             if (dbClient == null)
                 return false;
+
             _dbContext.Clients.Remove(dbClient);
             _dbContext.SaveChanges();
             return true;
@@ -98,7 +121,27 @@ namespace BankSystem.Data.Storages
             if (dbClient == null)
                 return false;
 
-            dbClient.Accounts.Add(account);
+            var currency = account.Currency;
+
+            var dbCurrency = _dbContext.Currencies.Local.FirstOrDefault(c => c.Code == currency.Code);
+
+            if (dbCurrency == null)
+                dbCurrency = _dbContext.Currencies.FirstOrDefault(c => c.Code == currency.Code);
+
+            if (dbCurrency == null)
+            {
+                dbCurrency = new Currency(currency.Code, currency.Symbol);
+                _dbContext.Currencies.Add(dbCurrency);
+            }
+            else
+            {
+                if (_dbContext.Entry(dbCurrency).State == EntityState.Detached)
+                    _dbContext.Currencies.Attach(dbCurrency);
+            }
+
+            Account addAccount = new Account(dbClient.Id, dbCurrency, account.Amount, account.AccountNumber);
+
+            dbClient.Accounts.Add(addAccount);
             _dbContext.SaveChanges();
             return true;
         }
@@ -119,7 +162,24 @@ namespace BankSystem.Data.Storages
             if (dbAccount == null)
                 return false;
 
-            _dbContext.Entry(dbAccount).CurrentValues.SetValues(account);
+
+
+            var dbCurrency = _dbContext.Currencies.Local.FirstOrDefault(c => c.Code == account.Currency.Code)
+                ?? _dbContext.Currencies.FirstOrDefault(c => c.Code == account.Currency.Code);
+
+            if (dbCurrency == null)
+            {
+                dbCurrency = new Currency(account.Currency.Code, account.Currency.Symbol);
+                _dbContext.Currencies.Add(dbCurrency);
+            }
+            else
+            {
+                if (_dbContext.Entry(dbCurrency).State == EntityState.Detached)
+                    _dbContext.Currencies.Attach(dbCurrency);
+            }
+
+            dbAccount.EditAccount(dbCurrency, account.Amount);
+
             _dbContext.SaveChanges();
             return true;
         }
@@ -140,12 +200,13 @@ namespace BankSystem.Data.Storages
             if (dbAccount == null)
                 return false;
 
+
             _dbContext.Accounts.Remove(dbAccount);
             _dbContext.SaveChanges();
             return true;
         }
 
-        public PagedResult<Client> GetFilterClients (ClientFilterDTO filter, int page, int pageSize = 10)
+        public PagedResult<Client> GetFilterClients(ClientFilterDTO filter, int page, int pageSize = 10)
         {
             var query = _dbContext.Clients
                 .Include(c => c.Accounts)

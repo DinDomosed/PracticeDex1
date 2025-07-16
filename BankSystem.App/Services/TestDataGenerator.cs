@@ -12,16 +12,16 @@ namespace BankSystem.App.Services
 {
     public class TestDataGenerator
     {
-        private List<string> _testCodeCurrence = new List<string> { "RUB", "USD", "EUR" };
-        private List<char> _testSymbolCurrense = new List<char> { '₽', '$', '€' };
+        private List<string> _testCodeCurrence = new List<string> { "RUB", "EUR" };
+        private List<char> _testSymbolCurrense = new List<char> { '₽', '€' };
         public List<Client> GenerateTestListClients(int count = 1000)
         {
             List<Client> list = new List<Client>();
 
-            Faker<Account> fakerAcc = new Faker<Account>()
-                .CustomInstantiator(f => new Account(
-                    GenerateTestCurrency(),
-                    f.Finance.Amount(500, 3000)));
+            //Faker<Account> fakerAcc = new Faker<Account>()
+            //    .CustomInstantiator(f => new Account(
+            //        GenerateTestCurrency(),
+            //        f.Finance.Amount(500, 3000)));
 
             Faker<Client> fakerClient = new Faker<Client>()
                 .CustomInstantiator(f => new Client(
@@ -29,18 +29,14 @@ namespace BankSystem.App.Services
                     f.Date.Past(90, DateTime.Today.AddYears(-18)),
                     f.Internet.Email(),
                     f.Phone.PhoneNumber("+7 (###) ###-##-##"),
-                    f.Random.Replace("#### ######"),
-                    fakerAcc.Generate()
+                    f.Random.Replace("#### ######")
+                    //fakerAcc.Generate()
                     ));
 
             for (int i = 0; i < count; i++)
             {
                 list.Add(fakerClient.Generate());
             }
-            //Клиент для тестов
-            decimal testAmount = 2400;
-            list.Add(new Client("Неказаков Вячеслав Андреевич", new DateTime(2016 , 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623",
-                new Account(new Currency("USD", '$'), testAmount)));
             return list;
         }
 
@@ -78,10 +74,6 @@ namespace BankSystem.App.Services
 
             for (int i = 0; i < count; i++)
                 list.Add(faker.Generate());
-
-            //Сотрудник для тестов
-            list.Add(new Employee("Ковальчук Диана Андреевна", new DateTime(2003, 12, 31),
-                new EmployeeContract(new DateTime(2025, 7, 1), new DateTime(2060, 7, 1), 600, "backend developer"), "4324 666666"));
 
             return list;
         }

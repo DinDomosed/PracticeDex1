@@ -13,13 +13,14 @@ namespace BankSystem.Domain.Models
 
         // For EF
         public Client? ClientProfile { get; private set; } = null!;
-        public Guid ClientId { get; private set; }
+        public Guid? ClientId { get; private set; }
         protected Employee() : base() { }
         
         public Employee (string FullName, DateTime Birthday, EmployeeContract contract, string passportNumber) : base (FullName, Birthday)
         {
             ContractEmployee = contract;
             PassportNumber = passportNumber;
+
         }
         public Employee(Guid Id, string FullName, DateTime Birthday, EmployeeContract contract, string passportNumber) : base(Id, FullName, Birthday)
         {
@@ -29,7 +30,7 @@ namespace BankSystem.Domain.Models
 
         public void CreateClientProfile(string email, string phoneNumber)
         {
-            ClientProfile = new Client(Id, FullName, Birthday, email, phoneNumber, PassportNumber);
+            ClientProfile = new Client(FullName, Birthday, email, phoneNumber, PassportNumber);
         }
 
         public void SetContract (EmployeeContract contract)

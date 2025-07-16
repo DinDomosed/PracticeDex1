@@ -34,7 +34,7 @@ namespace BankSystem.App.Tests
             if (_allBankClients.ContainsKey(client.Id))
                 return false;
 
-            client.Accounts.Add(new Account(new Currency("USD", '$'), 0));
+            client.Accounts.Add(new Account(client.Id, new Currency("USD", '$'), 0));
             _allBankClients.Add(client.Id, client);
             return true;
         }

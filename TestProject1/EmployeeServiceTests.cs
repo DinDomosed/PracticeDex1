@@ -323,7 +323,7 @@ namespace BankSystem.App.Tests
             Employee employeeTest = new Employee(TestId, "Тестовый сотрудник1", new DateTime(2006, 9, 6),
                 new EmployeeContract(new DateTime(2020, 6, 24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 111111");
 
-            Account testAccount = new Account(new Currency("USD", '$'), 5000);
+            Account testAccount = new Account(employeeTest.Id, new Currency("USD", '$'), 5000);
 
             employeeService.AddEmployee(employeeTest);
 

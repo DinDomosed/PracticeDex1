@@ -12,7 +12,7 @@ namespace BankSystem.Domain.Models
     {
         public decimal Amount { get; private set; }
         public string AccountNumber { get; private set; }
-        public Guid Id { get; private set; } = Guid.NewGuid();
+        public Guid Id { get; private set; }
 
         //For EF
         public Currency Currency { get; private set; } = null!;
@@ -22,11 +22,13 @@ namespace BankSystem.Domain.Models
         protected Account() { }
 
 
-        public Account (Currency currency, decimal amount, string? accountNumber = null)
+        public Account (Guid idClient, Currency currency, decimal amount, string? accountNumber = null, Guid? id = null)
         {
+            Id = id ?? Guid.NewGuid();
             Currency = currency;
             Amount = amount;
             AccountNumber = accountNumber ?? GenerateAccountNumber();
+            IdClient = idClient;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -59,6 +61,7 @@ namespace BankSystem.Domain.Models
         {
             Currency = currency;
             Amount = amount;
+            CurrencyCode = currency.Code;
         }
 
         public override string ToString()

@@ -73,7 +73,7 @@ namespace BankSystem.App.Tests
 
             Client testClient = new Client(testId, "Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
             clientService.AddClient(testClient);
-            
+
             Client newDataClient = new Client(testId, "Тестовый клиент111", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
 
             //Act
@@ -172,7 +172,7 @@ namespace BankSystem.App.Tests
                 clientService.AddClient(cl);
             }
 
-            Account newAccount = new Account(new Currency("RUB", '#'), 50000, "111 111 111");
+            Account newAccount = new Account(testGuid, new Currency("RUB", '#'), 50000, "111 111 111");
             Client Fakeclient = new Client("Тестовый клиент11", new DateTime(2001, 9, 6), "testClient11.ru", "+7 919 111 11 11", "4324 011111");
 
 
@@ -204,7 +204,7 @@ namespace BankSystem.App.Tests
             clientList.AddRange(new Client[]
             {
                 new Client( testGuid, "Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111",
-                 new Account(new Currency("RUB", '#'), 50000, "111 111 111")),
+                 new Account(testGuid, new Currency("RUB", '#'), 50000, "111 111 111")),
 
                 new Client("Тестовый клиент2", new DateTime(2001, 11, 2), "testClient2.ru", "+7 918 222 22 22", "4324 222222"),
 
@@ -232,7 +232,7 @@ namespace BankSystem.App.Tests
 
 
             //Act 
-            Account UpdateAcc = new Account(new Currency("EUR", '€'), 6000);
+            Account UpdateAcc = new Account(testGuid, new Currency("EUR", '€'), 6000);
             bool result = clientService.UpdateAccount(testGuid, "111 111 111", UpdateAcc);
 
             var client = fakeClientStorage.Get(testGuid);
@@ -257,7 +257,7 @@ namespace BankSystem.App.Tests
 
             Client testClient = new Client(testId, "Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
             clientService.AddClient(testClient);
-            clientService.AddAccountToClient(testClient.Id , new Account(new Currency("USD", '$'), 4000, "123"));
+            clientService.AddAccountToClient(testClient.Id, new Account(testClient.Id, new Currency("USD", '$'), 4000, "123"));
 
             //Act
             bool result = clientService.DeleteAccount(testClient.Id, "123");
@@ -276,8 +276,8 @@ namespace BankSystem.App.Tests
             List<Client> clientList = new List<Client>(); //10
             clientList.AddRange(new Client[]
             {
-                new Client("Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111",
-                 new Account(new Currency("RUB", '#'), 50000, "111 111 111")),
+                new Client("Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111"),
+                 /*new Account(new Currency("RUB", '#'), 50000, "111 111 111"))*/
 
                 new Client("Тестовый клиент2", new DateTime(2001, 11, 2), "testClient2.ru", "+7 918 222 22 22", "4324 222222"),
 
@@ -293,7 +293,7 @@ namespace BankSystem.App.Tests
 
                 new Client("Тестовый клиент8", new DateTime(2002, 10, 4), "testClient8.ru", "+7 918 888 88 88", "4324 888888"),
 
-                new Client("Тестовый клиент9", new DateTime(2000, 12, 2), "testClient9.ru", "+7 918 999 99 99", "4324 999999"), 
+                new Client("Тестовый клиент9", new DateTime(2000, 12, 2), "testClient9.ru", "+7 918 999 99 99", "4324 999999"),
 
                 new Client("Тестовый клиент10", new DateTime(1980, 8, 17), "testClient10.ru", "+7 918 000 00 00", "4324 000000")
         });
