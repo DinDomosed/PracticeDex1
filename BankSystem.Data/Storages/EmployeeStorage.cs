@@ -2,6 +2,7 @@
 using BankSystem.App.DTOs;
 using BankSystem.App.Interfaces;
 using BankSystem.Domain.Models;
+using Bogus.DataSets;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.Internal;
 using System;
@@ -82,16 +83,18 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool CreateClientProfileAndAccount(Guid employeeId, Account account, string email, string phoneNumber)
+        public bool CreateClientProfileAndAccount(Guid employeeId, BankSystem.Domain.Models.Currency currency, string email, string phoneNumber)
         {
             if (!_allEmployeeBank.TryGetValue(employeeId, out var employee))
                 return false;
-            if (account == null)
+            if (currency == null)
                 return false;
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phoneNumber))
                 return false;
             if (employee.ClientProfile != null)
                 return false;
+
+            Account account = new Account(employeeId, currency, 0);
 
             _allEmployeeBank[employeeId].CreateClientProfile(email, phoneNumber);
             _allEmployeeBank[employeeId].ClientProfile.Accounts.Add(account);

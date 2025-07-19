@@ -12,7 +12,7 @@ namespace BankSystem.Domain.Models
         public string PassportNumber { get; private set; }
 
         // For EF
-        public Client? ClientProfile { get; private set; } = null!;
+        public Client? ClientProfile { get; private set; }
         public Guid? ClientId { get; private set; }
         protected Employee() : base() { }
         

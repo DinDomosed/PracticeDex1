@@ -104,13 +104,13 @@ namespace BankSystem.App.Services
             return _employeeStorage.GetFilterEmployees(filter, page, pageSize);
         }
 
-        public bool CreateAccountProfile(Guid employeeId, Account account, string email, string phoneNumber)
+        public bool CreateAccountProfile(Guid employeeId, Currency currency, string email, string phoneNumber)
         {
             var employee = _employeeStorage.Get(employeeId)
                 ?? throw new EmployeeNotFoundException("Ошибка: Клиент не найден");
 
-            if (account == null)
-                throw new ArgumentNullException("Ошибка: Счет не может быть null");
+            if (currency == null)
+                throw new ArgumentNullException("Ошибка: Валюта не может быть null");
 
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException(nameof(email), "Ошибка: email введен не корректно");
@@ -118,7 +118,7 @@ namespace BankSystem.App.Services
             if (string.IsNullOrWhiteSpace(phoneNumber))
                 throw new ArgumentException(nameof(phoneNumber), "Ошибка: номер телефона введен не корректно");
 
-            return _employeeStorage.CreateClientProfileAndAccount(employeeId, account, email, phoneNumber);
+            return _employeeStorage.CreateClientProfileAndAccount(employeeId, currency, email, phoneNumber);
         }
 
         public bool DeleteAccount(Guid employeeId, Guid idAccount)

@@ -92,7 +92,7 @@ namespace BankSystem.Data.Storages
 
             _dbContext.Entry(dbClient).CurrentValues.SetValues(upClient);
 
-            var entry = _dbContext.Entry(dbClient);
+            //var entry = _dbContext.Entry(dbClient);
 
             _dbContext.SaveChanges();
             return true;

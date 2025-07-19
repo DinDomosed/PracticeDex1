@@ -5,6 +5,7 @@ using BankSystem.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,11 @@ namespace BankSystem.Data.Storages
 {
     public class EmployeeDbStorage : IEmployeeStorage
     {
-        private readonly BankSystemDbContext _dbContext = new BankSystemDbContext();
+        private readonly BankSystemDbContext _dbContext;
+        public EmployeeDbStorage(BankSystemDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
         public Employee? Get(Guid id)
         {
@@ -81,27 +86,33 @@ namespace BankSystem.Data.Storages
             if (employeeId == Guid.Empty)
                 return false;
 
-            var dbEmp = _dbContext.Employees.FirstOrDefault(c => c.Id == employeeId);
+            var dbEmployee = _dbContext.Employees.FirstOrDefault(c => c.Id == employeeId);
 
-            if (dbEmp == null)
+            if (dbEmployee == null)
                 return false;
 
-            var dbEmployeeContract = dbEmp.ContractEmployee;
+            var dbEmployeeContract = _dbContext.EmployeeContracts.FirstOrDefault(c => c.EmployeeId == dbEmployee.Id);
 
             if (dbEmployeeContract == null)
                 return false;
 
-            _dbContext.EmployeeContracts.Entry(dbEmployeeContract).CurrentValues.SetValues(newContract);
+            if (dbEmployeeContract.EmployeeId != dbEmployee.Id)
+                return false;
+
+            var entry = _dbContext.Entry(dbEmployeeContract);
+            entry.Property(c => c.StartOfWork).IsModified = true;
+            entry.Property(c => c.EndOfContract).IsModified = true;
+            entry.Property(c => c.Salary).IsModified = true;
+            entry.Property(c => c.Post).IsModified = true;
+
+            dbEmployee.SetContract(newContract);
             _dbContext.SaveChanges();
             return true;
         }
 
-        public bool CreateClientProfileAndAccount(Guid employeeId, Account account, string email, string phoneNumber)
+        public bool CreateClientProfileAndAccount(Guid employeeId, Currency currency, string email, string phoneNumber)
         {
             if (employeeId == Guid.Empty)
-                return false;
-
-            if (account == null)
                 return false;
 
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phoneNumber))
@@ -124,14 +135,39 @@ namespace BankSystem.Data.Storages
                 //Тут добавляем в БД, в том случае, если впервые создаем сотруднику клентский профиль
                 else
                     _dbContext.Clients.Add(clientProf);
-
             }
+
+
+
+            if (currency == null)
+                return false;
+
+            var dbCurrency = _dbContext.Currencies.Local.FirstOrDefault(c => c.Code == currency.Code);
+
+            if (dbCurrency == null)
+                dbCurrency = _dbContext.Currencies.FirstOrDefault(c => c.Code == currency.Code);
+
+            if (dbCurrency == null)
+            {
+                _dbContext.Currencies.Add(currency);
+                dbCurrency = currency;
+            }
+            else
+            {
+                if (_dbContext.Entry(dbCurrency).State == EntityState.Detached)
+                    _dbContext.Currencies.Attach(dbCurrency);
+            }
+
+
+
+            Account account = new Account(clientProf.Id, dbCurrency, 0);
 
             clientProf.Accounts.Add(account);
 
             _dbContext.SaveChanges();
             return true;
         }
+
         public bool DeleteAccount(Guid employeeId, Guid idAccount)
         {
             if (employeeId == Guid.Empty)
@@ -175,6 +211,7 @@ namespace BankSystem.Data.Storages
                 .Include(c => c.ClientProfile)
                 .ThenInclude(c => c.Accounts)
                 .FirstOrDefault(c => c.Id == employeeId);
+
             if (dbEmployee == null)
                 return false;
 
@@ -183,7 +220,24 @@ namespace BankSystem.Data.Storages
             if (dbAccount == null)
                 return false;
 
-            _dbContext.Accounts.Entry(dbAccount).CurrentValues.SetValues(upAccount);
+            var dbCurrency = _dbContext.Currencies.Local.FirstOrDefault(c => c.Code == upAccount.CurrencyCode);
+
+            if (dbCurrency == null)
+                _dbContext.Currencies.FirstOrDefault(c => c.Code == upAccount.CurrencyCode);
+
+            if (dbCurrency == null)
+            {
+                dbCurrency = new Currency(upAccount.CurrencyCode, upAccount.Currency.Symbol);
+            }
+
+            else
+            {
+                if (_dbContext.Entry(dbCurrency).State == EntityState.Detached)
+                    _dbContext.Currencies.Attach(dbCurrency);
+            }
+
+
+            dbAccount.EditAccount(dbCurrency, upAccount.Amount);
             _dbContext.SaveChanges();
             return true;
         }

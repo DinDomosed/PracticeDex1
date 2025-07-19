@@ -1,13 +1,14 @@
-﻿using System;
+﻿using BankSystem.App.DTOs;
+using BankSystem.App.Exceptions;
+using BankSystem.App.Interfaces;
+using BankSystem.App.Services;
+using BankSystem.Data.Storages;
+using BankSystem.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BankSystem.App.DTOs;
-using BankSystem.App.Exceptions;
-using BankSystem.App.Interfaces;
-using BankSystem.App.Services;
-using BankSystem.Domain.Models;
 
 namespace BankSystem.App.Tests
 {
@@ -18,8 +19,8 @@ namespace BankSystem.App.Tests
         {
             //Arrange
 
-            IEmployeeStorage fakeEmployeeStorage = new FakeEmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(fakeEmployeeStorage);
+            IEmployeeStorage EmployeeStorage = new EmployeeStorage();
+            EmployeeService employeeService = new EmployeeService(EmployeeStorage);
 
             List<Employee> employees = new List<Employee>()
             {
@@ -67,15 +68,15 @@ namespace BankSystem.App.Tests
 
             //Assert
             Assert.True(result);
-            Assert.Equal(9, fakeEmployeeStorage.GetAll().Count);
+            Assert.Equal(9, EmployeeStorage.GetAll().Count);
         }
 
         [Fact]
         public void UpdateEmployee_Test()
         {
             //Arrange 
-            IEmployeeStorage fakeStorage = new FakeEmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(fakeStorage);
+            IEmployeeStorage EmployeeStorage = new EmployeeStorage();
+            EmployeeService employeeService = new EmployeeService(EmployeeStorage);
 
             Guid TestId = Guid.NewGuid();
             List<Employee> employees = new List<Employee>()
@@ -112,7 +113,7 @@ namespace BankSystem.App.Tests
             {
                 employeeService.AddEmployee(emp);
             }
-            Employee employeeTest = fakeStorage.Get(TestId);
+            Employee employeeTest = EmployeeStorage.Get(TestId);
 
 
             //Act 
@@ -130,8 +131,8 @@ namespace BankSystem.App.Tests
         public void DeleteEmployee_Test()
         {
             //Arrange 
-            IEmployeeStorage fakeStorage = new FakeEmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(fakeStorage);
+            IEmployeeStorage employeeStorage = new EmployeeStorage();
+            EmployeeService employeeService = new EmployeeService(employeeStorage);
 
             Guid TestId = Guid.NewGuid();
             List<Employee> employees = new List<Employee>()//9
@@ -169,23 +170,23 @@ namespace BankSystem.App.Tests
                 employeeService.AddEmployee(emp);
             }
 
-            Employee deleteEmployee = fakeStorage.Get(TestId);
+            Employee deleteEmployee = employeeStorage.Get(TestId);
 
 
             //Act
             employeeService.DeleteEmployee(deleteEmployee.Id);
-            bool result = fakeStorage.GetAll().Any(u => u.Id == TestId);
+            bool result = employeeStorage.GetAll().Any(u => u.Id == TestId);
 
             //Assert
-            Assert.Equal(8, fakeStorage.GetAll().Count);
+            Assert.Equal(8, employeeStorage.GetAll().Count);
             Assert.False(result);
         }
         [Fact]
         public void UpdateEmployeeContract_Test_Equal_True()
         {
             //Arrange
-            IEmployeeStorage fakeEmployeeStorage = new FakeEmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(fakeEmployeeStorage);
+            IEmployeeStorage EmployeeStorage = new EmployeeStorage();
+            EmployeeService employeeService = new EmployeeService(EmployeeStorage);
             Guid guidTest = Guid.NewGuid();
 
             List<Employee> employees = new List<Employee>()
@@ -228,17 +229,17 @@ namespace BankSystem.App.Tests
             employeeService.UpdateEmployeeContract(guidTest, newContract);
 
             //Assert
-            Assert.Equal(new DateTime(3000, 1, 1), fakeEmployeeStorage.Get(guidTest).ContractEmployee.EndOfContract);
-            Assert.Equal(3500, fakeEmployeeStorage.Get(guidTest).ContractEmployee.Salary);
-            Assert.Equal("Тестовый сотрудник1", fakeEmployeeStorage.Get(guidTest).FullName);
+            Assert.Equal(new DateTime(3000, 1, 1), EmployeeStorage.Get(guidTest).ContractEmployee.EndOfContract);
+            Assert.Equal(3500, EmployeeStorage.Get(guidTest).ContractEmployee.Salary);
+            Assert.Equal("Тестовый сотрудник1", EmployeeStorage.Get(guidTest).FullName);
         }
 
         [Fact]
         public void GetFilterEmployee_Test_Count_4_5()
         {
             //Arrange
-            IEmployeeStorage fakeEmployeeStorage = new FakeEmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(fakeEmployeeStorage);
+            IEmployeeStorage EmployeeStorage = new EmployeeStorage();
+            EmployeeService employeeService = new EmployeeService(EmployeeStorage);
 
             List<Employee> employees = new List<Employee>()
             {
@@ -316,20 +317,20 @@ namespace BankSystem.App.Tests
         public void CreateAccountProfile_Test()
         {
             //Arrange
-            IEmployeeStorage fakeStorage = new FakeEmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(fakeStorage);
+            IEmployeeStorage employeeStorage = new EmployeeStorage();
+            EmployeeService employeeService = new EmployeeService(employeeStorage);
 
             Guid TestId = Guid.NewGuid();
             Employee employeeTest = new Employee(TestId, "Тестовый сотрудник1", new DateTime(2006, 9, 6),
                 new EmployeeContract(new DateTime(2020, 6, 24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 111111");
 
-            Account testAccount = new Account(employeeTest.Id, new Currency("USD", '$'), 5000);
+            var currnecy = new Currency("USD", '$');
 
             employeeService.AddEmployee(employeeTest);
 
 
             //Act
-            employeeService.CreateAccountProfile(employeeTest.Id, testAccount, "testEmpCl@mail.ru", "+7 918 111 12 12");
+            employeeService.CreateAccountProfile(employeeTest.Id, currnecy, "testEmpCl@mail.ru", "+7 918 111 12 12");
 
             //Assert
             Assert.NotEqual(null, employeeTest.ClientProfile);

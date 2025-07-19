@@ -3,6 +3,7 @@ using System;
 using BankSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BankSystem.Data.Migrations
 {
     [DbContext(typeof(BankSystemDbContext))]
-    partial class BankSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718103515_MakeClientIdNullable")]
+    partial class MakeClientIdNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

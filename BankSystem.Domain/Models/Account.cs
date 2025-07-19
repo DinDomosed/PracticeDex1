@@ -29,6 +29,7 @@ namespace BankSystem.Domain.Models
             Amount = amount;
             AccountNumber = accountNumber ?? GenerateAccountNumber();
             IdClient = idClient;
+            CurrencyCode = currency.Code;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

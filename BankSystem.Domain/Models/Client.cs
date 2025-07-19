@@ -15,7 +15,7 @@ namespace BankSystem.Domain.Models
         public DateTime RegistrationDate { get; private set; }
 
         // For EF
-        public Employee? EmployeeProfile { get; private set; } = null!;
+        public Employee? EmployeeProfile { get; private set; }
         protected Client() : base() { }
 
         public Client(string FullName, DateTime birthday, string email, string phoneNumber, string passportNumber, Account? account = null) : base(FullName, birthday)

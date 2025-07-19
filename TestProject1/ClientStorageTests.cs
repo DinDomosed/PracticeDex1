@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BankSystem.App.Interfaces;
 using BankSystem.App.Services;
+using BankSystem.Data.Storages;
 using BankSystem.Domain.Models;
 using Bogus;
 
@@ -18,41 +19,41 @@ namespace BankSystem.App.Tests
         public void AddClientToStorageTest_Count_10()
         {
             //Arrange
-            IClientStorage fakeClientStorage = new FakeClientStorage(); 
+            IClientStorage ClientStorage = new ClientStorage(); 
             TestDataGenerator generator = new TestDataGenerator();
 
             //Act
             var testListClient = generator.GenerateTestListClients(10);
             foreach (var client in testListClient)
             {
-                fakeClientStorage.Add(client);
+                ClientStorage.Add(client);
             }
 
 
             //Assert 
-            Assert.Equal(10, fakeClientStorage.GetAll().Count);
+            Assert.Equal(10, ClientStorage.GetAll().Count);
         }
 
         [Fact]
         public void GetYoungestClientFromStorageClient()
         {
             //Arrange
-            IClientStorage fakeClientStorage = new FakeClientStorage();
+            IClientStorage ClientStorage = new ClientStorage();
             TestDataGenerator generator = new TestDataGenerator();
 
             Client clientTest = new Client("Тестовый самый молодой клиент", new DateTime(2020, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623");
-            fakeClientStorage.Add(clientTest);
+            ClientStorage.Add(clientTest);
 
             var testGenerateClients = generator.GenerateTestListClients(10);
             foreach (var client in testGenerateClients)
             {
-                fakeClientStorage.Add(client);
+                ClientStorage.Add(client);
             }
 
 
             //Act
 
-            var youngestClient = fakeClientStorage.GetAll().OrderBy(u => u.Birthday).LastOrDefault();
+            var youngestClient = ClientStorage.GetAll().OrderBy(u => u.Birthday).LastOrDefault();
 
             bool resultEqualBirthday = youngestClient.Birthday.Equals(new DateTime(2020, 11, 2));
             bool resultEqualFullName = youngestClient.FullName.Equals("Тестовый самый молодой клиент");
@@ -67,14 +68,14 @@ namespace BankSystem.App.Tests
         public void GetOldestClientFromStorageClient()
         {
             //Arrange
-            IClientStorage fakeClientStorage = new FakeClientStorage();
+            IClientStorage ClientStorage = new ClientStorage();
             TestDataGenerator generator = new TestDataGenerator();
 
-            fakeClientStorage.Add(new Client("Тестовый клиент", new DateTime(1950, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623"));
+            ClientStorage.Add(new Client("Тестовый клиент", new DateTime(1950, 11, 2), "Clava007@mail.ru", "+7 918 123 36 78", "4324 964623"));
 
             var testGenerateClients = generator.GenerateTestListClients(10);
             //Act
-            var olderClient = fakeClientStorage.GetAll().OrderBy(u => u.Birthday).First();
+            var olderClient = ClientStorage.GetAll().OrderBy(u => u.Birthday).First();
             bool resultEqualBirthday = olderClient.Birthday.Equals(new DateTime(1950, 11, 2));
             bool resultEqualFullName = olderClient.FullName.Equals("Тестовый клиент");
 
@@ -112,15 +113,15 @@ namespace BankSystem.App.Tests
                 new Client("Тестовый клиент10", new DateTime(1980, 8, 17), "testClient10.ru", "+7 918 000 00 00", "4324 000000"), //44
         });
 
-            IClientStorage fakeClientStorage = new FakeClientStorage();
+            IClientStorage ClientStorage = new ClientStorage();
             foreach (var client in clientList)
             {
-                fakeClientStorage.Add(client);
+                ClientStorage.Add(client);
             }
 
             //Act
-            int sumAge = fakeClientStorage.GetAll().Sum(c => c.Age);
-            int result = sumAge / fakeClientStorage.GetAll().Count; //22
+            int sumAge = ClientStorage.GetAll().Sum(c => c.Age);
+            int result = sumAge / ClientStorage.GetAll().Count; //22
 
             //Assert
             Assert.Equal(result, 22);
