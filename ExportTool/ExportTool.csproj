@@ -8,9 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BankSystem.App\BankSystem.App.csproj" />
+    <ProjectReference Include="..\BankSystem.Data\BankSystem.Data.csproj" />
     <ProjectReference Include="..\BankSystem.Domain\BankSystem.Domain.csproj" />
   </ItemGroup>
 

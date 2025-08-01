@@ -1,12 +1,23 @@
-﻿using BankSystem.Domain;
+﻿using BankSystem.App;
+using BankSystem.App.DTOs;
+using BankSystem.App.Exceptions;
+using BankSystem.App.Services;
+using BankSystem.Data;
+using BankSystem.Data.Storages;
+using BankSystem.Domain;
 using BankSystem.Domain.Models;
-using System.Text;
 using CsvHelper;
+using CsvHelper.Configuration;
+using ExportTool.Maps;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
+using System.Reflection.Metadata;
+using System.Text;
+
 
 namespace ExportTool
 {
-    public class ExportService<T>
+    public class ExportService
     {
         protected string PathToDirectory { get; private set; }
         protected string FileName { get; private set; }
@@ -16,10 +27,10 @@ namespace ExportTool
             PathToDirectory = pathToDirectory;
             FileName = fileName;
         }
-        public void ExportToCvsFile(List<T> data)
+        public bool ExportClientToCvsFile(List<Client> data)
         {
-            if (data.Count == 0 || data == null)
-                return;
+            if (data == null || data.Count == 0)
+                return false;
 
             DirectoryInfo dirInfo = new DirectoryInfo(PathToDirectory);
 
@@ -28,29 +39,110 @@ namespace ExportTool
 
             string fullpath = Path.Combine(PathToDirectory, FileName);
 
-            bool FileNeedsHeaders = !File.Exists(fullpath) || new FileInfo(fullpath).Length == 0;
-
-            using (FileStream fileStream = new FileStream(fullpath, FileMode.OpenOrCreate))
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                using(StreamWriter streamWriter = new StreamWriter(fileStream, new UTF8Encoding()))
+                Delimiter = ";"
+            };
+
+            List<ClientCsvDto> dtoData = data.Select(c => new ClientCsvDto
+            {
+                Id = c.Id,
+                FullName = c.FullName,
+                Birthday = c.Birthday,
+                Bonus = c.Bonus,
+                Email = c.Email,
+                PhoneNumber = c.PhoneNumber,
+                PassportNumber = c.PassportNumber,
+                RegistrationDate = c.RegistrationDate
+
+            }).ToList();
+
+            using (FileStream fileStream = new FileStream(fullpath, FileMode.Create))
+            {
+                using (StreamWriter streamWriter = new StreamWriter(fileStream, new UTF8Encoding(true)))
                 {
-                    using (CsvWriter writer = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
+                    using (CsvWriter writer = new CsvWriter(streamWriter, config))
                     {
-                        if(FileNeedsHeaders)
-                        {
-                            writer.WriteHeader<Client>();
-                            writer.NextRecord();
-                        }
+                        writer.Context.RegisterClassMap<ClientCsvDtoMap>();
 
-                        foreach(var client in data)
-                        {
-                            writer.WriteRecord(client);
-                            writer.NextRecord();
-                        }
-
-                        writer.Flush();
+                        writer.WriteRecords(dtoData);
+                        return true;
                     }
                 }
+            }
+        }
+        public bool ReadClientsFromCvsFileAndWriteToDb()
+        {
+            DirectoryInfo directory = new DirectoryInfo(PathToDirectory);
+
+            if (!directory.Exists)
+                return false;
+
+            string fullpath = Path.Combine(PathToDirectory, FileName);
+            try
+            {
+                using (FileStream fileStream = new FileStream(fullpath, FileMode.Open))
+                {
+                    using (StreamReader streamReader = new StreamReader(fileStream))
+                    {
+                        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+                        {
+                            Delimiter = ";",
+                            HeaderValidated = null
+                        };
+                        using (CsvReader reader = new CsvReader(streamReader, config))
+                        {
+                            reader.Context.RegisterClassMap<ClientCsvDtoMap>();
+                            var recordsDto = reader.GetRecords<ClientCsvDto>();
+
+                            List<Client> records = recordsDto.Select(dto =>
+                            new Client(
+                                dto.Id,
+                                dto.FullName,
+                                dto.Birthday,
+                                dto.Email,
+                                dto.PhoneNumber,
+                                dto.PassportNumber
+                                )).ToList();
+
+                            using (BankSystemDbContext dbContext = new BankSystemDbContext())
+                            {
+                                ClientDbStorage dbStorage = new ClientDbStorage(dbContext);
+                                ClientService service = new ClientService(dbStorage);
+
+                                foreach (var record in records)
+                                {
+                                    try
+                                    {
+                                        service.AddClient(record);
+                                    }
+                                    catch (PassportNumberNullOrWhiteSpaceException passportEx)
+                                    {
+                                        continue;
+                                    }
+                                    catch (InvalidClientAgeException InvalidAgeEx)
+                                    {
+                                        continue;
+                                    }
+                                    catch (ArgumentNullException ArgNullEx)
+                                    {
+                                        continue;
+                                    }
+                                    catch (ArgumentException argEx)
+                                    {
+                                        continue;
+                                    }
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
     }

@@ -69,8 +69,8 @@ namespace BankSystem.Data.EntityConfigurations
             builder.HasMany(c => c.Accounts)
                 .WithOne(a => a.Client)
                 .HasForeignKey(a => a.IdClient)
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired();
+                .OnDelete(DeleteBehavior.Cascade);
+                
 
         }
     }
