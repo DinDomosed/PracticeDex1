@@ -41,7 +41,8 @@ namespace ExportTool
 
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                Delimiter = ";"
+                Delimiter = ";",
+                HasHeaderRecord = !File.Exists(fullpath)
             };
 
             List<ClientCsvDto> dtoData = data.Select(c => new ClientCsvDto
@@ -57,7 +58,9 @@ namespace ExportTool
 
             }).ToList();
 
-            using (FileStream fileStream = new FileStream(fullpath, FileMode.Create))
+            FileMode mode = (File.Exists(fullpath)) ? FileMode.Append : FileMode.Create;
+
+            using (FileStream fileStream = new FileStream(fullpath, mode))
             {
                 using (StreamWriter streamWriter = new StreamWriter(fileStream, new UTF8Encoding(true)))
                 {

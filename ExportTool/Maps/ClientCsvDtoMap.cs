@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace ExportTool.Maps
 {
-    internal class ClientCsvDtoMap : ClassMap<ClientCsvDto>
+    public class ClientCsvDtoMap : ClassMap<ClientCsvDto>
     {
         public ClientCsvDtoMap()
         {
