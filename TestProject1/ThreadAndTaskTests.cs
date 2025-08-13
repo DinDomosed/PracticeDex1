@@ -28,7 +28,7 @@ namespace BankSystem.App.Tests
 
 
         [Fact]
-        public void Pipeline_ShouldProcessClientsAndWriteMultipleFiles()
+        public void Pipeline_ShouldProcessClientsAndWriteMultipleFiles_Test()
         {
             //Arrange
 
@@ -111,18 +111,18 @@ namespace BankSystem.App.Tests
 
                         }
                         //Формируем имя актуального файла и записиваем буффер в него
-                            string exactFileName = $"TestFile_{_currentFileIndex}.csv";
+                        string exactFileName = $"TestFile_{_currentFileIndex}.csv";
 
-                            ExportService export = new ExportService(basePath, exactFileName);
-                            export.ExportClientToCvsFile(buffer);
+                        ExportService export = new ExportService(basePath, exactFileName);
+                        export.ExportClientToCvsFile(buffer);
 
-                            buffer.Clear();
+                        buffer.Clear();
 
                     }
                 }
             });
 
-            
+
             //Запуск потоков
             threadGenerator.Start();
             threadWriter.Start();
@@ -167,6 +167,47 @@ namespace BankSystem.App.Tests
             // 2. Нет дубликатов по Id
             Assert.Equal(clientsToGenerateCount, clientsFromCvs.Count);
             Assert.Equal(clientsFromCvs.Count, clientsFromCvs.Select(c => c.Id).Distinct().Count());
+        }
+
+        [Fact]
+        public void ParallelTransferOfMoneyFromDifferentThreads_Test()
+        {
+            //Arrange 
+
+            TestDataGenerator generator = new TestDataGenerator();
+            Client client = generator.GenerateTestListClients(1).First();
+
+            Account account = new Account(client.Id, new Currency("USD", '$'), 0);
+
+            int countOfLoops = 10;
+            decimal accrualAmount = 100;
+
+            //Act
+
+            // Используем lock только в момент доступа к разделяемому ресурсу,
+            // чтобы потоки могли работать параллельно, но с безопасным доступом к account
+            ThreadStart threadStart = () =>
+            {
+                for (int i = 0; i < countOfLoops; i++)
+                {
+                    lock (_locker)
+                    {
+                        account.PutMoney(accrualAmount);
+                    }
+                }
+
+            };
+
+            Thread thread1 = new Thread(threadStart);
+            Thread thread2 = new Thread(threadStart);
+
+            thread1.Start();
+            thread2.Start();
+            thread1.Join();
+            thread2.Join();
+
+            //Assert
+            Assert.Equal(countOfLoops * accrualAmount * 2, account.Amount);
         }
     }
 }
