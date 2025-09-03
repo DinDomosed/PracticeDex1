@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace BankSystem.App.Tests
     public class EmployeeStorageTests
     {
         [Fact]
-        public void AddEmployeeToStorageTest_Count_10()
+        public async Task AddEmployeeToStorageTest_Count_10()
         {
             //Arrange
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
@@ -50,16 +51,18 @@ namespace BankSystem.App.Tests
             //Act
             foreach (var employee in employees)
             {
-                EmployeeStorage.Add(employee);
+                await EmployeeStorage.AddAsync(employee);
             }
             ClientFilterDTO filter = new ClientFilterDTO();
 
+            var resuktListEmployees = await EmployeeStorage.GetAllAsync();
+
             //Assert
-            Assert.Equal(9, EmployeeStorage.GetAll().Count());
+            Assert.Equal(9, resuktListEmployees.Count());
         }
 
         [Fact]
-        public void GetYoungestEmployeeFromStorage()
+        public async Task GetYoungestEmployeeFromStorage()
         {
             //Arrange
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
@@ -96,9 +99,10 @@ namespace BankSystem.App.Tests
             //Act
             foreach (var employee in employees)
             {
-                EmployeeStorage.Add(employee);
+                await EmployeeStorage.AddAsync(employee);
             }
-            var youngestEmployee = EmployeeStorage.GetAll().OrderBy(u => u.Birthday).LastOrDefault();
+            var allEmployees = await EmployeeStorage.GetAllAsync();
+            var youngestEmployee = allEmployees.OrderBy(u => u.Birthday).LastOrDefault();
 
             //Assert
             Assert.NotNull(youngestEmployee);
@@ -106,7 +110,7 @@ namespace BankSystem.App.Tests
             Assert.Equal("Тестовый сотрудник1", youngestEmployee.FullName);
         }
         [Fact]
-        public void GetOlderEmployeeFromStorage ()
+        public async Task GetOlderEmployeeFromStorage ()
         {
             //Arrange 
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
@@ -143,9 +147,10 @@ namespace BankSystem.App.Tests
             //Act
             foreach (var employee in employees)
             {
-                EmployeeStorage.Add(employee);
+                await EmployeeStorage.AddAsync(employee);
             }
-            var olderEmployee = EmployeeStorage.GetAll().OrderBy(u => u.Birthday).First();
+            var allEmployees = await EmployeeStorage.GetAllAsync();
+            var olderEmployee = allEmployees.OrderBy(u => u.Birthday).First();
 
             //Assert
             Assert.NotNull(olderEmployee);
@@ -153,7 +158,7 @@ namespace BankSystem.App.Tests
             Assert.Equal("Тестовый сотрудник8", olderEmployee.FullName);
         }
         [Fact]
-        public void GetAverageAgeEmployee()
+        public async Task GetAverageAgeEmployee()
         {
             //Arrange
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
@@ -190,10 +195,11 @@ namespace BankSystem.App.Tests
             //Act
             foreach (var employee in employees)
             {
-                EmployeeStorage.Add(employee);
+                await EmployeeStorage.AddAsync(employee);
             }
-            int sumAge = EmployeeStorage.GetAll().Sum(u => u.Age);
-            int result = sumAge / EmployeeStorage.GetAll().Count();
+            var allEmployees = await EmployeeStorage.GetAllAsync();
+            int sumAge = allEmployees.Sum(u => u.Age);
+            int result = sumAge / allEmployees.Count();
 
             //Assert
             Assert.Equal(26, result);

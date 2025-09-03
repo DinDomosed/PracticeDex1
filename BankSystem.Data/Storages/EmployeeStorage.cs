@@ -21,7 +21,7 @@ namespace BankSystem.Data.Storages
         public IReadOnlyDictionary<Guid, Employee> AllEmployeeBank => _allEmployeeBank;
 
 
-        public Employee? Get(Guid Id)
+        public async Task<Employee?> GetAsync(Guid Id)
         {
             if (Id == Guid.Empty)
                 return null;
@@ -31,12 +31,12 @@ namespace BankSystem.Data.Storages
 
             return _allEmployeeBank[Id];
         }
-        public List<Employee> GetAll()
+        public async Task<List<Employee>> GetAllAsync()
         {
             return _allEmployeeBank.Values.ToList();
         }
 
-        public bool Add(Employee employee)
+        public async Task<bool> AddAsync(Employee employee)
         {
             if (_allEmployeeBank.ContainsKey(employee.Id))
                 return false;
@@ -45,7 +45,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool Update(Guid Id, Employee upEmployee)
+        public async Task<bool> UpdateAsync(Guid Id, Employee upEmployee)
         {
             if (Id == Guid.Empty)
                 return false;
@@ -59,7 +59,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool Delete(Guid Id)
+        public async Task<bool> DeleteAsync(Guid Id)
         {
             if (Id == Guid.Empty)
                 return false;
@@ -71,7 +71,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool UpdateContract(Guid employeeId, EmployeeContract newEmployeeContract)
+        public async Task<bool> UpdateContractAsync(Guid employeeId, EmployeeContract newEmployeeContract)
         {
             if (!_allEmployeeBank.ContainsKey(employeeId))
                 return false;
@@ -83,7 +83,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool CreateClientProfileAndAccount(Guid employeeId, BankSystem.Domain.Models.Currency currency, string email, string phoneNumber)
+        public async Task<bool> CreateClientProfileAndAccountAsync(Guid employeeId, BankSystem.Domain.Models.Currency currency, string email, string phoneNumber)
         {
             if (!_allEmployeeBank.TryGetValue(employeeId, out var employee))
                 return false;
@@ -102,7 +102,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool DeleteAccount(Guid employeeId, Guid idAccount)
+        public async Task<bool> DeleteAccountAsync(Guid employeeId, Guid idAccount)
         {
             if (employeeId == Guid.Empty || idAccount == Guid.Empty)
                 return false;
@@ -124,7 +124,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool UpdateAccount(Guid employeeId, Guid idAccount, Account upAccount)
+        public async Task<bool> UpdateAccountAsync(Guid employeeId, Guid idAccount, Account upAccount)
         {
             if (employeeId == Guid.Empty || idAccount == Guid.Empty)
                 return false;
@@ -148,7 +148,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public PagedResult<Employee> GetFilterEmployees(EmployeeFilterDTO filter, int page, int pageSize)
+        public async Task<PagedResult<Employee>> GetFilterEmployeesAsync(EmployeeFilterDTO filter, int page, int pageSize)
         {
             IEnumerable<Employee> employees = _allEmployeeBank.Values;
 
@@ -198,7 +198,7 @@ namespace BankSystem.Data.Storages
                 PageSize = pageSize
             };
         }
-        public bool Exists(Guid id, string passportNumber)
+        public async Task<bool> ExistsAsync(Guid id, string passportNumber)
         {
             return _allEmployeeBank.Any(c => c.Value.Id == id || c.Value.PassportNumber == passportNumber);
         }

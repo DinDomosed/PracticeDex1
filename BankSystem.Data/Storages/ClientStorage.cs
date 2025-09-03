@@ -18,7 +18,7 @@ namespace BankSystem.Data.Storages
         private Dictionary<Guid, Client> _allBankClients = new Dictionary<Guid, Client>();
         public IReadOnlyDictionary<Guid, Client> AllBankClients => _allBankClients;
 
-        public Client? Get(Guid Id)
+        public async Task<Client?> GetAsync(Guid Id)
         {
 
             if (!_allBankClients.ContainsKey(Id))
@@ -27,11 +27,11 @@ namespace BankSystem.Data.Storages
             return _allBankClients[Id];
         }
 
-        public List<Client> GetAll()
+        public async Task<List<Client>> GetAllAsync()
         {
             return _allBankClients.Values.ToList();
         }
-        public bool Add(Client client)
+        public async Task<bool> AddAsync(Client client)
         {
             if (_allBankClients.ContainsKey(client.Id))
                 return false;
@@ -41,7 +41,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool Update(Guid Id, Client upClient)
+        public async Task<bool> UpdateAsync(Guid Id, Client upClient)
         {
             if (Id == Guid.Empty)
                 return false;
@@ -55,7 +55,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool Delete(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             if (id == Guid.Empty)
                 return false;
@@ -66,7 +66,7 @@ namespace BankSystem.Data.Storages
             return _allBankClients.Remove(id);
         }
 
-        public bool AddAccount(Guid clientId, Account account)
+        public async Task<bool> AddAccountAsync(Guid clientId, Account account)
         {
             if (account == null)
                 return false;
@@ -78,7 +78,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool UpdateAccount(Guid clientId, string accountNumber, Account newAccount)
+        public async Task<bool> UpdateAccountAsync(Guid clientId, string accountNumber, Account newAccount)
         {
             if (!_allBankClients.TryGetValue(clientId, out Client client))
                 return false;
@@ -92,7 +92,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public bool DeleteAccount(Guid clientId, string accountNumber)
+        public async Task<bool> DeleteAccountAsync(Guid clientId, string accountNumber)
         {
             if (!_allBankClients.TryGetValue(clientId, out Client client))
                 return false;
@@ -110,7 +110,7 @@ namespace BankSystem.Data.Storages
             return true;
         }
 
-        public PagedResult<Client> GetFilterClients(ClientFilterDTO filter, int page, int pageSize)
+        public async Task<PagedResult<Client>> GetFilterClientsAsync(ClientFilterDTO filter, int page, int pageSize)
         {
             IEnumerable<Client> clients = _allBankClients.Values;
 
@@ -159,7 +159,7 @@ namespace BankSystem.Data.Storages
                 TotalCount = totalCount
             };
         }
-        public bool Exists(Guid id, string passportNumber)
+        public async Task<bool> ExistsAsync(Guid id, string passportNumber)
         {
             return _allBankClients.Any(c => c.Value.Id == id || c.Value.PassportNumber == passportNumber);
         }

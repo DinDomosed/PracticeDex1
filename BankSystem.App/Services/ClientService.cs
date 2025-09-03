@@ -17,31 +17,68 @@ namespace BankSystem.App.Services
     public class ClientService
     {
         private readonly IClientStorage _clientStorage;
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
         public ClientService(IClientStorage clientStorage)
         {
             _clientStorage = clientStorage;
         }
-        public Client? Get(Guid id)
+        
+        public async Task<bool> CashingOutMoney(Guid clientId, Guid accountId, decimal amount)
+        {
+            if (clientId == Guid.Empty || accountId == Guid.Empty)
+                return false;
+
+
+            await _semaphoreSlim.WaitAsync();
+            try
+            {
+                var foundClient = await _clientStorage.GetAsync(clientId);
+
+                if (foundClient == null)
+                    return false;
+
+                var foundAccount = foundClient.Accounts.FirstOrDefault(c => c.Id == accountId);
+
+                if (foundAccount == null)
+                    return false;
+
+                var currentAmount = foundAccount.Amount;
+                foundAccount.GetMoney(amount);
+
+                if (foundAccount.Amount == currentAmount)
+                {
+                    return false;
+                }
+
+                return await _clientStorage.UpdateAccountAsync(foundClient.Id, foundAccount.AccountNumber, foundAccount);
+            }
+            finally
+            {
+                _semaphoreSlim.Release(); 
+            }
+        }
+
+        public async Task<Client?> GetAsync(Guid id)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id), "Ошибка: Некорректный ID ");
 
-            return _clientStorage.Get(id);
+            return await _clientStorage.GetAsync(id);
         }
 
-        public List<Client> GetAll()
+        public async Task<List<Client>> GetAllAsync()
         {
-            return _clientStorage.GetAll();
+            return await _clientStorage.GetAllAsync();
         }
 
-        public bool AddClient(Client client)
+        public async Task<bool> AddClientAsync(Client client)
         {
             if (client == null)
                 throw new ArgumentNullException(nameof(client), "Ошибка: Клиент не может быть null");
 
-            if (_clientStorage.Exists(client.Id, client.PassportNumber))
+            if (await _clientStorage.ExistsAsync(client.Id, client.PassportNumber))
                 throw new ArgumentException(nameof(client), "Клиент уже зарегестрирован");
-                
+
             int minAgeLimit = 18;
 
             if (client.Age < minAgeLimit)
@@ -53,9 +90,9 @@ namespace BankSystem.App.Services
                 throw new PassportNumberNullOrWhiteSpaceException("Некорректный ввод серии и номера паспорта");
             }
 
-            return _clientStorage.Add(client);
+            return await _clientStorage.AddAsync(client);
         }
-        public bool UpdateClient(Guid idClient, Client client)
+        public async Task<bool> UpdateClientAsync(Guid idClient, Client client)
         {
             if (idClient == Guid.Empty)
                 throw new ArgumentNullException(nameof(idClient), "Ошибка: Некорректный ID");
@@ -63,7 +100,7 @@ namespace BankSystem.App.Services
             if (client == null)
                 throw new ArgumentNullException(nameof(client), "Ошибка: Клиент не может быть null");
 
-            var foundClient = _clientStorage.Get(idClient);
+            var foundClient = await _clientStorage.GetAsync(idClient);
 
             if (foundClient == null)
                 throw new ClientNotFoundException("Ошибка: Клиент не найден");
@@ -77,37 +114,37 @@ namespace BankSystem.App.Services
             if (string.IsNullOrWhiteSpace(client.PhoneNumber))
                 throw new ArgumentException("Ошибка: Некорректный номер телефона");
 
-            return _clientStorage.Update(idClient, client);
+            return await _clientStorage.UpdateAsync(idClient, client);
         }
-        public bool DeleteClient(Guid id)
+        public async Task<bool> DeleteClientAsync(Guid id)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException("Ошибка: Некорректный ID");
 
-            var foundClient = _clientStorage.Get(id);
+            var foundClient = await _clientStorage.GetAsync(id);
 
             if (foundClient == null)
                 throw new ClientNotFoundException("Ошибка: Клиент не найден");
 
-            return _clientStorage.Delete(foundClient.Id);
+            return await _clientStorage.DeleteAsync(foundClient.Id);
         }
 
-        public bool AddAccountToClient(Guid clientID, Account newAccount)
+        public async Task<bool> AddAccountToClientAsync(Guid clientID, Account newAccount)
         {
             if (newAccount == null)
                 throw new ArgumentNullException("Ошибка: добавляемый лицевой счет не может быть null");
 
-            var clientStorage = _clientStorage.Get(clientID);
+            var clientStorage = await _clientStorage.GetAsync(clientID);
 
             if (clientStorage == null)
                 throw new ClientNotFoundException("Ошибка: такого клиента нет в базе");
 
 
-            return _clientStorage.AddAccount(clientStorage.Id, newAccount);
+            return await _clientStorage.AddAccountAsync(clientStorage.Id, newAccount);
         }
-        public bool UpdateAccount(Guid IdClient, string accountNumber, Account newAccount)
+        public async Task<bool> UpdateAccountAsync(Guid IdClient, string accountNumber, Account newAccount)
         {
-            var client = _clientStorage.Get(IdClient)
+            var client = await _clientStorage.GetAsync(IdClient)
                 ?? throw new ClientNotFoundException("Ошибка: клиент не найден");
 
             if (string.IsNullOrWhiteSpace(accountNumber))
@@ -119,14 +156,14 @@ namespace BankSystem.App.Services
             if (newAccount == null)
                 throw new ArgumentNullException("Ошибка: cчет не может быть null");
 
-            return _clientStorage.UpdateAccount(IdClient, accountNumber, newAccount);
+            return await _clientStorage.UpdateAccountAsync(IdClient, accountNumber, newAccount);
         }
-        public bool DeleteAccount(Guid IdClient, string accountNumber)
+        public async Task<bool> DeleteAccountAsync(Guid IdClient, string accountNumber)
         {
             if (IdClient == Guid.Empty)
                 throw new ArgumentNullException(nameof(IdClient), "Ошибка: Некорректный ID");
 
-            var foundClient = _clientStorage.Get(IdClient);
+            var foundClient = await _clientStorage.GetAsync(IdClient);
 
             if (foundClient == null)
                 throw new ClientNotFoundException("Ошибка: Клиент не найден");
@@ -139,11 +176,11 @@ namespace BankSystem.App.Services
             if (foundAccount == null)
                 throw new AccountNotFoundException("Ошибка: У клиента нет аккаунта с таким номером");
 
-            return _clientStorage.DeleteAccount(IdClient, accountNumber);
+            return await _clientStorage.DeleteAccountAsync(IdClient, accountNumber);
 
         }
 
-        public PagedResult<Client> GetFilterClients(ClientFilterDTO filter, int page, int pageSize = 10)
+        public async Task<PagedResult<Client>> GetFilterClientsAsync(ClientFilterDTO filter, int page, int pageSize = 10)
         {
             if (page.Equals(default(int)))
                 throw new ArgumentException(nameof(page), "Ошибка страницы");
@@ -151,7 +188,7 @@ namespace BankSystem.App.Services
             if (pageSize.Equals(default(int)))
                 throw new ArgumentException(nameof(pageSize), "Ошибка: некорректный размер страницы");
 
-            return _clientStorage.GetFilterClients(filter, page, pageSize);
+            return await _clientStorage.GetFilterClientsAsync(filter, page, pageSize);
         }
     }
 }

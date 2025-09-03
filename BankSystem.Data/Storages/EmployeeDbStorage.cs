@@ -20,65 +20,65 @@ namespace BankSystem.Data.Storages
             _dbContext = dbContext;
         }
 
-        public Employee? Get(Guid id)
+        public async Task<Employee?> GetAsync(Guid id)
         {
             if (id == Guid.Empty)
                 return null;
 
-            return _dbContext.Employees
+            return await _dbContext.Employees
                 .Include(c => c.ContractEmployee)
                 .Include(c => c.ClientProfile)
                 .ThenInclude(c => c.Accounts)
-                .FirstOrDefault(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
-        public List<Employee> GetAll()
+        public async Task<List<Employee>> GetAllAsync()
         {
-            return _dbContext.Employees
+            return await _dbContext.Employees
                 .Include(c => c.ContractEmployee)
                 .Include(c => c.ClientProfile)
                 .ThenInclude(c => c.Accounts)
-                .ToList();
+                .ToListAsync();
         }
-        public bool Add(Employee employee)
+        public async Task<bool> AddAsync(Employee employee)
         {
-            if (_dbContext.Employees.Any(c => c.Id == employee.Id || c.PassportNumber == employee.PassportNumber))
+            if (await _dbContext.Employees.AnyAsync(c => c.Id == employee.Id || c.PassportNumber == employee.PassportNumber))
                 return false;
 
             _dbContext.Employees.Add(employee);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             return true;
         }
-        public bool Update(Guid id, Employee upEmployee)
+        public async Task<bool> UpdateAsync(Guid id, Employee upEmployee)
         {
             if (id == Guid.Empty)
                 return false;
 
-            var dbEmp = _dbContext.Employees.FirstOrDefault(c => c.Id == id);
+            var dbEmp = await _dbContext.Employees.FirstOrDefaultAsync(c => c.Id == id);
 
             if (dbEmp == null)
                 return false;
 
             _dbContext.Employees.Entry(dbEmp).CurrentValues.SetValues(upEmployee);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             return true;
         }
 
-        public bool Delete(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             if (id == Guid.Empty)
                 return false;
 
-            var dbEmp = _dbContext.Employees.FirstOrDefault(c => c.Id == id);
+            var dbEmp = await _dbContext.Employees.FirstOrDefaultAsync(c => c.Id == id);
 
             if (dbEmp == null)
                 return false;
 
             _dbContext.Employees.Remove(dbEmp);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             return true;
         }
 
-        public bool UpdateContract(Guid employeeId, EmployeeContract newContract)
+        public async Task<bool> UpdateContractAsync(Guid employeeId, EmployeeContract newContract)
         {
             if (newContract == null)
                 return false;
@@ -86,12 +86,12 @@ namespace BankSystem.Data.Storages
             if (employeeId == Guid.Empty)
                 return false;
 
-            var dbEmployee = _dbContext.Employees.FirstOrDefault(c => c.Id == employeeId);
+            var dbEmployee = await _dbContext.Employees.FirstOrDefaultAsync(c => c.Id == employeeId);
 
             if (dbEmployee == null)
                 return false;
 
-            var dbEmployeeContract = _dbContext.EmployeeContracts.FirstOrDefault(c => c.EmployeeId == dbEmployee.Id);
+            var dbEmployeeContract = await _dbContext.EmployeeContracts.FirstOrDefaultAsync(c => c.EmployeeId == dbEmployee.Id);
 
             if (dbEmployeeContract == null)
                 return false;
@@ -106,11 +106,11 @@ namespace BankSystem.Data.Storages
             entry.Property(c => c.Post).IsModified = true;
 
             dbEmployee.SetContract(newContract);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             return true;
         }
 
-        public bool CreateClientProfileAndAccount(Guid employeeId, Currency currency, string email, string phoneNumber)
+        public async Task<bool> CreateClientProfileAndAccountAsync(Guid employeeId, Currency currency, string email, string phoneNumber)
         {
             if (employeeId == Guid.Empty)
                 return false;
@@ -118,7 +118,7 @@ namespace BankSystem.Data.Storages
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phoneNumber))
                 return false;
 
-            var dbEmployee = _dbContext.Employees.FirstOrDefault(c => c.Id == employeeId);
+            var dbEmployee = await _dbContext.Employees.FirstOrDefaultAsync(c => c.Id == employeeId);
 
             if (dbEmployee == null)
                 return false;
@@ -145,7 +145,7 @@ namespace BankSystem.Data.Storages
             var dbCurrency = _dbContext.Currencies.Local.FirstOrDefault(c => c.Code == currency.Code);
 
             if (dbCurrency == null)
-                dbCurrency = _dbContext.Currencies.FirstOrDefault(c => c.Code == currency.Code);
+                dbCurrency = await _dbContext.Currencies.FirstOrDefaultAsync(c => c.Code == currency.Code);
 
             if (dbCurrency == null)
             {
@@ -164,11 +164,11 @@ namespace BankSystem.Data.Storages
 
             clientProf.Accounts.Add(account);
 
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             return true;
         }
 
-        public bool DeleteAccount(Guid employeeId, Guid idAccount)
+        public async Task<bool> DeleteAccountAsync(Guid employeeId, Guid idAccount)
         {
             if (employeeId == Guid.Empty)
                 return false;
@@ -176,10 +176,10 @@ namespace BankSystem.Data.Storages
             if (idAccount == Guid.Empty)
                 return false;
 
-            var dbEmployee = _dbContext.Employees
+            var dbEmployee = await _dbContext.Employees
                 .Include(c => c.ClientProfile)
                 .ThenInclude(c => c.Accounts)
-                .FirstOrDefault(c => c.Id == employeeId);
+                .FirstOrDefaultAsync(c => c.Id == employeeId);
 
             if (dbEmployee == null)
                 return false;
@@ -194,11 +194,11 @@ namespace BankSystem.Data.Storages
 
             dbEmployee.ClientProfile.Accounts.Remove(dbAccount);
             _dbContext.Accounts.Remove(dbAccount);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             return true;
 
         }
-        public bool UpdateAccount(Guid employeeId, Guid idAccount, Account upAccount)
+        public async Task<bool> UpdateAccountAsync(Guid employeeId, Guid idAccount, Account upAccount)
         {
             if (employeeId == Guid.Empty)
                 return false;
@@ -207,10 +207,10 @@ namespace BankSystem.Data.Storages
             if (upAccount == null)
                 return false;
 
-            var dbEmployee = _dbContext.Employees
+            var dbEmployee = await _dbContext.Employees
                 .Include(c => c.ClientProfile)
                 .ThenInclude(c => c.Accounts)
-                .FirstOrDefault(c => c.Id == employeeId);
+                .FirstOrDefaultAsync(c => c.Id == employeeId);
 
             if (dbEmployee == null)
                 return false;
@@ -223,7 +223,7 @@ namespace BankSystem.Data.Storages
             var dbCurrency = _dbContext.Currencies.Local.FirstOrDefault(c => c.Code == upAccount.CurrencyCode);
 
             if (dbCurrency == null)
-                _dbContext.Currencies.FirstOrDefault(c => c.Code == upAccount.CurrencyCode);
+                await _dbContext.Currencies.FirstOrDefaultAsync(c => c.Code == upAccount.CurrencyCode);
 
             if (dbCurrency == null)
             {
@@ -238,11 +238,11 @@ namespace BankSystem.Data.Storages
 
 
             dbAccount.EditAccount(dbCurrency, upAccount.Amount);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             return true;
         }
 
-        public PagedResult<Employee> GetFilterEmployees(EmployeeFilterDTO filter, int page, int pageSize)
+        public async Task<PagedResult<Employee>> GetFilterEmployeesAsync(EmployeeFilterDTO filter, int page, int pageSize)
         {
             var query = _dbContext.Employees
                 .Include(c => c.ClientProfile)
@@ -279,13 +279,13 @@ namespace BankSystem.Data.Storages
             if (!string.IsNullOrWhiteSpace(filter.Post))
                 query = query.Where(c => c.ContractEmployee != null && c.ContractEmployee.Post.ToLower().Contains(filter.Post.ToLower()));
 
-            int totalCount = query.Count();
+            int totalCount = await query.CountAsync();
 
-            var items = query
+            var items = await query
                 .OrderBy(c => c.FullName)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .ToListAsync();
 
             return new PagedResult<Employee>
             {
@@ -295,9 +295,9 @@ namespace BankSystem.Data.Storages
                 PageSize = pageSize
             };
         }
-        public bool Exists(Guid id, string passportNumber)
+        public async Task<bool> ExistsAsync(Guid id, string passportNumber)
         {
-            return _dbContext.Employees.Any(c => c.Id == id || c.PassportNumber == passportNumber);
+            return await _dbContext.Employees.AnyAsync(c => c.Id == id || c.PassportNumber == passportNumber);
         }
     }
 }

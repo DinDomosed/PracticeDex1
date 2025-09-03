@@ -19,18 +19,18 @@ namespace BankSystem.App.Services
         {
             _employeeStorage = employeeStorage;
         }
-        public Employee? Get(Guid id)
+        public async Task<Employee?> GetAsync(Guid id)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id), "Ошибка: Некорректный ID");
 
-            return _employeeStorage.Get(id);
+            return await _employeeStorage.GetAsync(id);
         }
-        public List<Employee> GetAll()
+        public async Task<List<Employee>> GetAllAsync()
         {
-            return _employeeStorage.GetAll();
+            return await _employeeStorage.GetAllAsync();
         }
-        public bool AddEmployee(Employee employee)
+        public async Task<bool> AddEmployeeAsync(Employee employee)
         {
             int minAge = 18;
             if (employee.Age < minAge)
@@ -42,9 +42,9 @@ namespace BankSystem.App.Services
             if (string.IsNullOrWhiteSpace(employee.PassportNumber))
                 throw new PassportNumberNullOrWhiteSpaceException("Неккоректный ввод серии и номера паспорта");
 
-            return _employeeStorage.Add(employee);
+            return await _employeeStorage.AddAsync(employee);
         }
-        public bool UpdateEmployee(Guid id, Employee upEmployee)
+        public async Task<bool> UpdateEmployeeAsync(Guid id, Employee upEmployee)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id), "Ошибка: Некорректный ID");
@@ -62,38 +62,38 @@ namespace BankSystem.App.Services
             if (string.IsNullOrWhiteSpace(upEmployee.PassportNumber))
                 throw new PassportNumberNullOrWhiteSpaceException("Неккоректный ввод серии и номера паспорта");
 
-            var foundEmployee = _employeeStorage.Get(id);
+            var foundEmployee = await _employeeStorage.GetAsync(id);
             if (foundEmployee == null)
                 throw new EmployeeNotFoundException("Ошибка: Сотрудник не найден");
 
-            return _employeeStorage.Update(id, upEmployee);
+            return await _employeeStorage.UpdateAsync(id, upEmployee);
         }
-        public bool DeleteEmployee(Guid id)
+        public async Task<bool> DeleteEmployeeAsync(Guid id)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id), "Ошибка: Некорректный ID");
 
 
-            var foundEmployee = _employeeStorage.Get(id);
+            var foundEmployee = await _employeeStorage.GetAsync(id);
             if (foundEmployee == null)
                 throw new EmployeeNotFoundException("Ошибка: Невозможно удлаить не существующего сотрудника");
 
-            return _employeeStorage.Delete(id);
+            return await _employeeStorage.DeleteAsync(id);
         }
-        public bool UpdateEmployeeContract(Guid id, EmployeeContract newContract)
+        public async Task<bool> UpdateEmployeeContractAsync(Guid id, EmployeeContract newContract)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id), "Ошибка: Некорректный ID");
 
-            Employee foundEmployee = _employeeStorage.Get(id);
+            Employee foundEmployee = await _employeeStorage.GetAsync(id);
 
             if (foundEmployee == null)
                 throw new EmployeeNotFoundException("Ошибка: Сотрудник не существует");
 
-            return _employeeStorage.UpdateContract(id, newContract);
+            return await _employeeStorage.UpdateContractAsync(id, newContract);
         }
 
-        public PagedResult<Employee> GetFilterEmployee(EmployeeFilterDTO filter, int page, int pageSize = 10)
+        public async Task<PagedResult<Employee>> GetFilterEmployeeAsync(EmployeeFilterDTO filter, int page, int pageSize = 10)
         {
             if (page.Equals(default(int)))
                 throw new ArgumentException(nameof(page), "Ошибка страницы");
@@ -101,12 +101,12 @@ namespace BankSystem.App.Services
             if (pageSize.Equals(default(int)))
                 throw new ArgumentException(nameof(pageSize), "Ошибка: некорректный размер страницы");
 
-            return _employeeStorage.GetFilterEmployees(filter, page, pageSize);
+            return await _employeeStorage.GetFilterEmployeesAsync(filter, page, pageSize);
         }
 
-        public bool CreateAccountProfile(Guid employeeId, Currency currency, string email, string phoneNumber)
+        public async Task<bool> CreateAccountProfileAsync(Guid employeeId, Currency currency, string email, string phoneNumber)
         {
-            var employee = _employeeStorage.Get(employeeId)
+            var employee = await _employeeStorage.GetAsync(employeeId)
                 ?? throw new EmployeeNotFoundException("Ошибка: Клиент не найден");
 
             if (currency == null)
@@ -118,10 +118,10 @@ namespace BankSystem.App.Services
             if (string.IsNullOrWhiteSpace(phoneNumber))
                 throw new ArgumentException(nameof(phoneNumber), "Ошибка: номер телефона введен не корректно");
 
-            return _employeeStorage.CreateClientProfileAndAccount(employeeId, currency, email, phoneNumber);
+            return await _employeeStorage.CreateClientProfileAndAccountAsync(employeeId, currency, email, phoneNumber);
         }
 
-        public bool DeleteAccount(Guid employeeId, Guid idAccount)
+        public async Task<bool> DeleteAccountAsync(Guid employeeId, Guid idAccount)
         {
             if (employeeId == Guid.Empty)
                 throw new ArgumentNullException(nameof(employeeId), "Ошибка: Некорректный ID сотрудника");
@@ -129,7 +129,7 @@ namespace BankSystem.App.Services
             if (idAccount == Guid.Empty)
                 throw new ArgumentNullException(nameof(idAccount), "Ошибка: Некорректный ID счета");
 
-            var foundEmployee = _employeeStorage.Get(employeeId)
+            var foundEmployee = await _employeeStorage.GetAsync(employeeId)
                 ?? throw new EmployeeNotFoundException("Ошибка: Клиент не найден");
 
             if (foundEmployee.ClientProfile == null)
@@ -138,9 +138,9 @@ namespace BankSystem.App.Services
             var foundAccount = foundEmployee.ClientProfile.Accounts.FirstOrDefault(c => c.Id == idAccount)
                 ?? throw new ArgumentException(nameof(idAccount), "Ошибка: у сотрудника нет счета с таким ID");
 
-            return _employeeStorage.DeleteAccount(employeeId, idAccount);
+            return await _employeeStorage.DeleteAccountAsync(employeeId, idAccount);
         }
-        public bool UpdateAccount(Guid employeeId, Guid idAccount, Account upAccount)
+        public async Task<bool> UpdateAccountAsync(Guid employeeId, Guid idAccount, Account upAccount)
         {
             if (employeeId == Guid.Empty)
                 throw new ArgumentNullException(nameof(employeeId), "Ошибка: Некорректный ID сотрудника");
@@ -152,7 +152,7 @@ namespace BankSystem.App.Services
                 throw new ArgumentNullException(nameof(upAccount), "Ошибка: Обновляемые данные не могут быть null");
 
 
-            return _employeeStorage.UpdateAccount(employeeId, idAccount, upAccount);
+            return await _employeeStorage.UpdateAccountAsync(employeeId, idAccount, upAccount);
         }
     }
 }

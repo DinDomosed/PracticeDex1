@@ -15,7 +15,7 @@ namespace BankSystem.App.Tests
     public class EmployeeServiceTests
     {
         [Fact]
-        public void AddEmployee_Test_Count_9()
+        public async Task AddEmployee_Test_Count_9()
         {
             //Arrange
 
@@ -33,7 +33,7 @@ namespace BankSystem.App.Tests
                 new Employee("Тестовый сотрудник3", new DateTime(2000, 6, 14),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 333333"),
 
-                new Employee("Тестовый сотрудник4", new DateTime(2004, 9, 5), 
+                new Employee("Тестовый сотрудник4", new DateTime(2004, 9, 5),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 444444"),
 
                 new Employee("Тестовый сотрудник5", new DateTime(1999, 3, 12),
@@ -42,13 +42,13 @@ namespace BankSystem.App.Tests
                 new Employee("Тестовый сотрудник6", new DateTime(1990, 4, 30),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 666666"),
 
-                new Employee("Тестовый сотрудник7", new DateTime(2000, 9, 11), 
+                new Employee("Тестовый сотрудник7", new DateTime(2000, 9, 11),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 777777"),
 
-                new Employee("Тестовый сотрудник8", new DateTime(1980, 9, 6), 
+                new Employee("Тестовый сотрудник8", new DateTime(1980, 9, 6),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 888888"),
 
-                new Employee("Тестовый сотрудник9", new DateTime(1999, 9, 6), 
+                new Employee("Тестовый сотрудник9", new DateTime(1999, 9, 6),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 999999"),
             };
 
@@ -56,23 +56,25 @@ namespace BankSystem.App.Tests
             bool result = false;
             foreach (var employee in employees)
             {
-                result = employeeService.AddEmployee(employee);
+                result = await employeeService.AddEmployeeAsync(employee);
             }
 
             //Act + Assert
-            Assert.Throws<InvalidEmployeeAgeException>(() =>
+            await Assert.ThrowsAsync<InvalidEmployeeAgeException>(async () =>
             {
-                employeeService.AddEmployee(new Employee("Тестовый сотрудник9", new DateTime(2009, 9, 6),
+                await employeeService.AddEmployeeAsync(new Employee("Тестовый сотрудник9", new DateTime(2009, 9, 6),
                     new EmployeeContract(new DateTime(2020, 6, 24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 999999"));
             });
 
+            var allEmployee = await EmployeeStorage.GetAllAsync();
+
             //Assert
             Assert.True(result);
-            Assert.Equal(9, EmployeeStorage.GetAll().Count);
+            Assert.Equal(9, allEmployee.Count);
         }
 
         [Fact]
-        public void UpdateEmployee_Test()
+        public async Task UpdateEmployee_Test()
         {
             //Arrange 
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
@@ -81,7 +83,7 @@ namespace BankSystem.App.Tests
             Guid TestId = Guid.NewGuid();
             List<Employee> employees = new List<Employee>()
             {
-                new Employee(TestId,"Тестовый сотрудник1", new DateTime(2006, 9, 6), 
+                new Employee(TestId,"Тестовый сотрудник1", new DateTime(2006, 9, 6),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 111111"),
 
                 new Employee("Тестовый сотрудник2", new DateTime(2005, 10, 19),
@@ -90,7 +92,7 @@ namespace BankSystem.App.Tests
                 new Employee("Тестовый сотрудник3", new DateTime(2000, 6, 14),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 333333"),
 
-                new Employee("Тестовый сотрудник4", new DateTime(2004, 9, 5), 
+                new Employee("Тестовый сотрудник4", new DateTime(2004, 9, 5),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 444444"),
 
                 new Employee("Тестовый сотрудник5", new DateTime(1999, 3, 12),
@@ -99,28 +101,28 @@ namespace BankSystem.App.Tests
                 new Employee("Тестовый сотрудник6", new DateTime(1990, 4, 30),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 666666"),
 
-                new Employee("Тестовый сотрудник7", new DateTime(2000, 9, 11), 
+                new Employee("Тестовый сотрудник7", new DateTime(2000, 9, 11),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 777777"),
 
                 new Employee("Тестовый сотрудник8", new DateTime(1980, 9, 6),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 888888"),
 
-                new Employee("Тестовый сотрудник9", new DateTime(1999, 9, 6), 
+                new Employee("Тестовый сотрудник9", new DateTime(1999, 9, 6),
                 new EmployeeContract(new DateTime(2020,6,24), new DateTime(2060, 6, 24), 1500, "Бекенд разработчик"), "4324 999999"),
             };
 
-            foreach(var emp in employees)
+            foreach (var emp in employees)
             {
-                employeeService.AddEmployee(emp);
+                await employeeService.AddEmployeeAsync(emp);
             }
-            Employee employeeTest = EmployeeStorage.Get(TestId);
+            Employee employeeTest = await EmployeeStorage.GetAsync(TestId);
 
 
             //Act 
-            Employee newDataEmployee = new Employee(TestId, "Тестовый сотрудник1000", new DateTime(2000, 9, 6), 
+            Employee newDataEmployee = new Employee(TestId, "Тестовый сотрудник1000", new DateTime(2000, 9, 6),
                 new EmployeeContract(new DateTime(2025, 7, 1), new DateTime(2070, 7, 1), 5000, "Бекенд разработчик"), "4324 111111");
-           
-            employeeService.UpdateEmployee(newDataEmployee.Id, newDataEmployee);
+
+            await employeeService.UpdateEmployeeAsync(newDataEmployee.Id, newDataEmployee);
 
             //Assert
             Assert.NotEqual(employeeTest.FullName, newDataEmployee.FullName);
@@ -128,7 +130,7 @@ namespace BankSystem.App.Tests
         }
 
         [Fact]
-        public void DeleteEmployee_Test()
+        public async Task DeleteEmployee_Test()
         {
             //Arrange 
             IEmployeeStorage employeeStorage = new EmployeeStorage();
@@ -167,22 +169,23 @@ namespace BankSystem.App.Tests
 
             foreach (var emp in employees)
             {
-                employeeService.AddEmployee(emp);
+                await employeeService.AddEmployeeAsync(emp);
             }
 
-            Employee deleteEmployee = employeeStorage.Get(TestId);
+            Employee deleteEmployee = await employeeStorage.GetAsync(TestId);
 
 
             //Act
-            employeeService.DeleteEmployee(deleteEmployee.Id);
-            bool result = employeeStorage.GetAll().Any(u => u.Id == TestId);
+            await employeeService.DeleteEmployeeAsync(deleteEmployee.Id);
+            var allEmployees = await employeeStorage.GetAllAsync();
+            bool result = allEmployees.Any(u => u.Id == TestId);
 
             //Assert
-            Assert.Equal(8, employeeStorage.GetAll().Count);
+            Assert.Equal(8, allEmployees.Count);
             Assert.False(result);
         }
         [Fact]
-        public void UpdateEmployeeContract_Test_Equal_True()
+        public async Task UpdateEmployeeContract_Test_Equal_True()
         {
             //Arrange
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
@@ -221,21 +224,23 @@ namespace BankSystem.App.Tests
 
             foreach (var employee in employees)
             {
-                employeeService.AddEmployee(employee);
+                await employeeService.AddEmployeeAsync(employee);
             }
             EmployeeContract newContract = new EmployeeContract(new DateTime(2020, 6, 24), new DateTime(3000, 1, 1), 3500, "Бекенд разработчик");
 
             //Act
-            employeeService.UpdateEmployeeContract(guidTest, newContract);
+            await employeeService.UpdateEmployeeContractAsync(guidTest, newContract);
+
+            var foundEmployee = await EmployeeStorage.GetAsync(guidTest);
 
             //Assert
-            Assert.Equal(new DateTime(3000, 1, 1), EmployeeStorage.Get(guidTest).ContractEmployee.EndOfContract);
-            Assert.Equal(3500, EmployeeStorage.Get(guidTest).ContractEmployee.Salary);
-            Assert.Equal("Тестовый сотрудник1", EmployeeStorage.Get(guidTest).FullName);
+            Assert.Equal(new DateTime(3000, 1, 1), foundEmployee.ContractEmployee.EndOfContract);
+            Assert.Equal(3500, foundEmployee.ContractEmployee.Salary);
+            Assert.Equal("Тестовый сотрудник1", foundEmployee.FullName);
         }
 
         [Fact]
-        public void GetFilterEmployee_Test_Count_4_5()
+        public async Task GetFilterEmployee_Test_Count_4_5()
         {
             //Arrange
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
@@ -273,7 +278,7 @@ namespace BankSystem.App.Tests
 
             foreach (var employee in employees)
             {
-                employeeService.AddEmployee(employee);
+                await employeeService.AddEmployeeAsync(employee);
             }
 
 
@@ -290,8 +295,11 @@ namespace BankSystem.App.Tests
                 BirthDateTo = new DateTime(2007, 1, 1)
             };
 
-            List<Employee> filterEmployee = employeeService.GetFilterEmployee(filter1, 1 , 10).Items;
-            var filterEmployee2 = employeeService.GetFilterEmployee(filter2, 1).Items;
+            var resultFilter1 = await employeeService.GetFilterEmployeeAsync(filter1, 1, 10);
+            var resultfilter2 = await employeeService.GetFilterEmployeeAsync(filter2, 1);
+
+            List<Employee> filterEmployee = resultFilter1.Items;
+            var filterEmployee2 = resultfilter2.Items;
 
             filterEmployee = filterEmployee.OrderBy(u => u.ContractEmployee.Salary).ToList();
             filterEmployee2 = filterEmployee2.OrderBy(u => u.Birthday).ToList();
@@ -314,7 +322,7 @@ namespace BankSystem.App.Tests
         }
 
         [Fact]
-        public void CreateAccountProfile_Test()
+        public async Task CreateAccountProfile_Test()
         {
             //Arrange
             IEmployeeStorage employeeStorage = new EmployeeStorage();
@@ -326,11 +334,11 @@ namespace BankSystem.App.Tests
 
             var currnecy = new Currency("USD", '$');
 
-            employeeService.AddEmployee(employeeTest);
+            await employeeService.AddEmployeeAsync(employeeTest);
 
 
             //Act
-            employeeService.CreateAccountProfile(employeeTest.Id, currnecy, "testEmpCl@mail.ru", "+7 918 111 12 12");
+            await employeeService.CreateAccountProfileAsync(employeeTest.Id, currnecy, "testEmpCl@mail.ru", "+7 918 111 12 12");
 
             //Assert
             Assert.NotEqual(null, employeeTest.ClientProfile);

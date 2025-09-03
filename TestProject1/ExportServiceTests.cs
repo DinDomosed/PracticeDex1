@@ -34,7 +34,7 @@ namespace BankSystem.App.Tests
             Assert.True(result);
         }
         [Fact]
-        public void ReadClientsFromCvsFileAndWriteToDb_Test()
+        public async Task ReadClientsFromCvsFileAndWriteToDb_Test()
         {
             //Arrange
             string pathToDirectory = Path.Combine("D:", "TestDirectory");
@@ -42,7 +42,7 @@ namespace BankSystem.App.Tests
             ExportService export = new ExportService(pathToDirectory, fileName);
 
             //Act
-            bool result = export.ReadClientsFromCvsFileAndWriteToDb();
+            bool result = await export.ReadClientsFromCvsFileAndWriteToDbAsync();
 
             //Assert
             Assert.True(result);

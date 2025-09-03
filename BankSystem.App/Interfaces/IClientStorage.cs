@@ -12,9 +12,9 @@ namespace BankSystem.App.Interfaces
 {
     public interface IClientStorage : IStorage<Client>
     {
-        public bool AddAccount(Guid clientID, Account account);
-        public bool UpdateAccount(Guid clientID, string accountNumber, Account account);
-        public bool DeleteAccount(Guid clientID, string accountNumber);
-        public PagedResult<Client> GetFilterClients(ClientFilterDTO filter, int page, int pageSize);
+        public Task<bool> AddAccountAsync(Guid clientID, Account account);
+        public Task<bool> UpdateAccountAsync(Guid clientID, string accountNumber, Account account);
+        public Task<bool> DeleteAccountAsync(Guid clientID, string accountNumber);
+        public Task<PagedResult<Client>> GetFilterClientsAsync(ClientFilterDTO filter, int page, int pageSize);
     }
 }

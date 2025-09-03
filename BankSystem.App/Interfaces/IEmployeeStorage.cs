@@ -11,10 +11,10 @@ namespace BankSystem.App.Interfaces
 {
     public interface IEmployeeStorage : IStorage<Employee>
     {
-        public bool UpdateContract(Guid employeeId, EmployeeContract newContract);
-        public bool CreateClientProfileAndAccount(Guid employeeId, Currency currency, string email, string phoneNumber);
-        public bool DeleteAccount(Guid employeeId, Guid idAccount);
-        public bool UpdateAccount(Guid employeeId, Guid idAccount, Account upAccount);
-        public PagedResult<Employee> GetFilterEmployees(EmployeeFilterDTO filter, int page, int pageSize);
+        public Task<bool> UpdateContractAsync(Guid employeeId, EmployeeContract newContract);
+        public Task<bool> CreateClientProfileAndAccountAsync(Guid employeeId, Currency currency, string email, string phoneNumber);
+        public Task<bool> DeleteAccountAsync(Guid employeeId, Guid idAccount);
+        public Task<bool> UpdateAccountAsync(Guid employeeId, Guid idAccount, Account upAccount);
+        public Task<PagedResult<Employee>> GetFilterEmployeesAsync(EmployeeFilterDTO filter, int page, int pageSize);
     }
 }

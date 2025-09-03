@@ -15,7 +15,7 @@ namespace BankSystem.App.Tests
     public class EmployeeDbStorageTest
     {
         [Fact]
-        public void Add_Test()
+        public async Task Add_Test()
         {
             //Arrange 
             BankSystemDbContext dbContext = new BankSystemDbContext();
@@ -28,7 +28,7 @@ namespace BankSystem.App.Tests
             bool result = false;
             foreach (var employee in employees)
             {
-                result = dbStorage.Add(employee);
+                result = await dbStorage.AddAsync(employee);
             }
 
             //Assert
@@ -37,27 +37,27 @@ namespace BankSystem.App.Tests
 
 
         [Fact]
-        public void Update_test()
+        public async Task Update_test()
         {
             //Arrange
             BankSystemDbContext dbContext = new BankSystemDbContext();
             EmployeeDbStorage dbStorage = new EmployeeDbStorage(dbContext);
-            var foundClient = dbStorage.Get(Guid.Parse("33fe71a9-06f1-4028-950b-0469c734638b"));
-            var newDateEmployee = new Employee(foundClient.Id, foundClient.FullName, foundClient.Birthday, foundClient.ContractEmployee, "0001 010101");
+            var foundEmployee = await dbStorage.GetAsync(Guid.Parse("33fe71a9-06f1-4028-950b-0469c734638b"));
+            var newDateEmployee = new Employee(foundEmployee.Id, foundEmployee.FullName, foundEmployee.Birthday, foundEmployee.ContractEmployee, "0001 010101");
 
             //Act
-            bool result = dbStorage.Update(Guid.Parse("33fe71a9-06f1-4028-950b-0469c734638b"), newDateEmployee);
-            var foundClient2 = dbStorage.Get(Guid.Parse("33fe71a9-06f1-4028-950b-0469c734638b"));
+            bool result = await dbStorage.UpdateAsync(Guid.Parse("33fe71a9-06f1-4028-950b-0469c734638b"), newDateEmployee);
+            var updatedEmployee = await dbStorage.GetAsync(Guid.Parse("33fe71a9-06f1-4028-950b-0469c734638b"));
 
             //Assert
             Assert.True(result);
-            Assert.Equal("0001 010101", foundClient2.PassportNumber);
-            Assert.NotEqual("1612 633276", foundClient2.PassportNumber);
-            Assert.Equal(foundClient.FullName, foundClient2.FullName);
+            Assert.Equal("0001 010101", updatedEmployee.PassportNumber);
+            Assert.NotEqual("1612 633276", updatedEmployee.PassportNumber);
+            Assert.Equal(foundEmployee.FullName, updatedEmployee.FullName);
         }
 
         [Fact]
-        public void Delete_test()
+        public async Task Delete_test()
         {
             //Arrange
             BankSystemDbContext dbContext = new BankSystemDbContext();
@@ -68,9 +68,9 @@ namespace BankSystem.App.Tests
                 new EmployeeContract(new DateTime(2025, 7, 18), null, 3000, "Backend-developer"), "0020 020202");
 
             //Act
-            var resultAdd = dbStorage.Add(deletedEmployye);
-            var foundEmployee = dbStorage.Get(deletedEmployye.Id);
-            var resultDelete = dbStorage.Delete(deletedEmployye.Id);
+            var resultAdd = await dbStorage.AddAsync(deletedEmployye);
+            var foundEmployee = await dbStorage.GetAsync(deletedEmployye.Id);
+            var resultDelete = await dbStorage.DeleteAsync(deletedEmployye.Id);
 
             //Assert
             Assert.True(resultAdd);
@@ -79,7 +79,7 @@ namespace BankSystem.App.Tests
         }
 
         [Fact]
-        public void UpdateContract_Test()
+        public async Task UpdateContract_Test()
         {
             //Arrange
             BankSystemDbContext dbContext = new BankSystemDbContext();
@@ -93,19 +93,19 @@ namespace BankSystem.App.Tests
 
 
             //Act
-            bool resultFirstData = dbStorage.UpdateContract(Guid.Parse("3af9105a-b9e1-497a-aa3d-c237aef22ba9"), testContract);
-            bool result = dbStorage.UpdateContract(Guid.Parse("3af9105a-b9e1-497a-aa3d-c237aef22ba9"), newDataContract);
-            var foundClient = dbStorage.Get(Guid.Parse("3af9105a-b9e1-497a-aa3d-c237aef22ba9"));
+            bool resultFirstData = await dbStorage.UpdateContractAsync(Guid.Parse("3af9105a-b9e1-497a-aa3d-c237aef22ba9"), testContract);
+            bool result = await dbStorage.UpdateContractAsync(Guid.Parse("3af9105a-b9e1-497a-aa3d-c237aef22ba9"), newDataContract);
+            var foundEmployee = await dbStorage.GetAsync(Guid.Parse("3af9105a-b9e1-497a-aa3d-c237aef22ba9"));
 
             //Assert
             Assert.True(resultFirstData);
             Assert.True(result);
-            Assert.Equal("Middle Backend Developer", foundClient.ContractEmployee.Post);
-            Assert.NotEqual(2500, foundClient.ContractEmployee.Salary);
+            Assert.Equal("Middle Backend Developer", foundEmployee.ContractEmployee.Post);
+            Assert.NotEqual(2500, foundEmployee.ContractEmployee.Salary);
         }
 
         [Fact]
-        public void CreateClientProfileAndAccount_Test()
+        public async Task CreateClientProfileAndAccount_Test()
         {
             //Arrange
             BankSystemDbContext dbContext = new BankSystemDbContext();
@@ -118,63 +118,63 @@ namespace BankSystem.App.Tests
             Currency testCurrency = new Currency("GBP", '£');
 
             //Act
-            bool resultAdd = dbStorage.Add(EmployeeTest);
+            bool resultAdd = await dbStorage.AddAsync(EmployeeTest);
 
-            bool result = dbStorage.CreateClientProfileAndAccount(EmployeeTest.Id, testCurrency,
+            bool result = await dbStorage.CreateClientProfileAndAccountAsync(EmployeeTest.Id, testCurrency,
                 testData_EmailAndPhone.Email, testData_EmailAndPhone.PhoneNumber);
 
-            var foundClient = dbStorage.Get(EmployeeTest.Id);
+            var foundEmployee = await dbStorage.GetAsync(EmployeeTest.Id);
 
             //Assert
             Assert.True(result);
             Assert.True(resultAdd);
-            Assert.NotNull(foundClient);
-            Assert.NotNull(foundClient.ClientProfile);
-            Assert.Equal("GBP", foundClient.ClientProfile.Accounts.First().CurrencyCode);
+            Assert.NotNull(foundEmployee);
+            Assert.NotNull(foundEmployee.ClientProfile);
+            Assert.Equal("GBP", foundEmployee.ClientProfile.Accounts.First().CurrencyCode);
 
         }
 
         [Fact]
-        public void DeleteAccount_Test()
+        public async Task DeleteAccount_Test()
         {
             //Arrange
             BankSystemDbContext dbContext = new BankSystemDbContext();
             EmployeeDbStorage dbStorage = new EmployeeDbStorage(dbContext);
-
-            var foundClientProfile = dbStorage.Get(Guid.Parse("141a712b-47bb-4a61-9379-8561605da2d6")).ClientProfile;
+            var foundEmployee = await dbStorage.GetAsync(Guid.Parse("141a712b-47bb-4a61-9379-8561605da2d6"));
+            var foundClientProfile = foundEmployee.ClientProfile;
             var currency = new Currency("EUR", '€');
 
-            bool resultAdd = dbStorage.CreateClientProfileAndAccount(Guid.Parse("141a712b-47bb-4a61-9379-8561605da2d6"),
+            bool resultAdd = await dbStorage.CreateClientProfileAndAccountAsync(Guid.Parse("141a712b-47bb-4a61-9379-8561605da2d6"),
                 currency, foundClientProfile.Email, foundClientProfile.PhoneNumber);
 
             //Act
-            var foundAcc = foundClientProfile.Accounts.FirstOrDefault(c => c.CurrencyCode == "EUR");
+            var foundAccount = foundClientProfile.Accounts.FirstOrDefault(c => c.CurrencyCode == "EUR");
 
-            bool resultDelete = dbStorage.DeleteAccount(Guid.Parse("141a712b-47bb-4a61-9379-8561605da2d6"), foundAcc.Id);
+            bool resultDelete = await dbStorage.DeleteAccountAsync(Guid.Parse("141a712b-47bb-4a61-9379-8561605da2d6"), foundAccount.Id);
 
             //Assert
-            Assert.NotNull(foundAcc);
+            Assert.NotNull(foundAccount);
             Assert.True(resultAdd);
             Assert.True(resultDelete);
         }
 
         [Fact]
-        public void UpdateAccount_Test()
+        public async Task UpdateAccount_Test()
         {
             //Arrange
             BankSystemDbContext dbContext = new BankSystemDbContext();
             EmployeeDbStorage dbStorage = new EmployeeDbStorage(dbContext);
 
-            var foundEmployee = dbStorage.Get(Guid.Parse("717f5ba7-5fdb-484d-a948-319143a61ecd"));
+            var foundEmployee = await dbStorage.GetAsync(Guid.Parse("717f5ba7-5fdb-484d-a948-319143a61ecd"));
             var newDataAccount = new Account(foundEmployee.ClientProfile.Id, new Currency("GBP", '£'), 999);
 
 
             //Act
-            bool resultAdd = dbStorage.CreateClientProfileAndAccount(foundEmployee.Id, new Currency("EUR", '€'),
+            bool resultAdd = await dbStorage.CreateClientProfileAndAccountAsync(foundEmployee.Id, new Currency("EUR", '€'),
                 foundEmployee.ClientProfile.Email, foundEmployee.ClientProfile.PassportNumber);
 
             var foundOldAccount = foundEmployee.ClientProfile.Accounts.FirstOrDefault(c => c.CurrencyCode == "EUR");
-            bool resultUpdate = dbStorage.UpdateAccount(foundEmployee.Id, foundOldAccount.Id, newDataAccount);
+            bool resultUpdate = await dbStorage.UpdateAccountAsync(foundEmployee.Id, foundOldAccount.Id, newDataAccount);
 
             //Assert
             Assert.True(resultAdd);
@@ -183,7 +183,7 @@ namespace BankSystem.App.Tests
         }
 
         [Fact]
-        public void GetFilterEmployees_Test()
+        public async Task GetFilterEmployees_Test()
         {
             //Arrange
             BankSystemDbContext dbContext = new BankSystemDbContext();
@@ -197,7 +197,8 @@ namespace BankSystem.App.Tests
             };
 
             //Act
-            var result = dbStorage.GetFilterEmployees(filter, 1, 10).Items;
+            var pagedResult = await dbStorage.GetFilterEmployeesAsync(filter, 1, 10);
+            var result = pagedResult.Items;
 
             //Assert
             Assert.NotNull(result);

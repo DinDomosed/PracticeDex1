@@ -99,7 +99,7 @@ namespace BankSystem.App.Services
                 throw new ArgumentNullException(nameof(post));
 
             Employee employee = new Employee(client.Id, client.FullName, client.Birthday, new EmployeeContract(dateStartWork, dateEndWork, salary, post), client.PassportNumber);
-            _employeeService.AddEmployee(employee);
+            _employeeService.AddEmployeeAsync(employee);
 
             return employee;
         }

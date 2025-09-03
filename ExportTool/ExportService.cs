@@ -74,7 +74,7 @@ namespace ExportTool
                 }
             }
         }
-        public bool ReadClientsFromCvsFileAndWriteToDb()
+        public async Task<bool> ReadClientsFromCvsFileAndWriteToDbAsync()
         {
             DirectoryInfo directory = new DirectoryInfo(PathToDirectory);
 
@@ -117,7 +117,7 @@ namespace ExportTool
                                 {
                                     try
                                     {
-                                        service.AddClient(record);
+                                        await service.AddClientAsync(record);
                                     }
                                     catch (PassportNumberNullOrWhiteSpaceException passportEx)
                                     {

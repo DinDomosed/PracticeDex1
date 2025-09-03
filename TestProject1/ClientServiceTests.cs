@@ -8,6 +8,7 @@ using BankSystem.App.DTOs;
 using BankSystem.App.Exceptions;
 using BankSystem.App.Interfaces;
 using BankSystem.App.Services;
+using BankSystem.Data.Storages;
 using BankSystem.Domain.Models;
 
 namespace BankSystem.App.Tests
@@ -15,11 +16,82 @@ namespace BankSystem.App.Tests
     public class ClientServiceTests
     {
         [Fact]
-        public void AddClient_Count_10()
+        public async Task CashingOutMoney_memoryTest()
+        {
+            //Arrange 
+            IClientStorage clientStorage = new ClientStorage();
+            ClientService clientService = new ClientService(clientStorage);
+
+            List<Client> clientList = new List<Client>();
+            clientList.AddRange(new Client[]
+            {
+                new Client(new Guid(" 9f8b1c6e-2d4f-4a8a-9b2e-3f1d7e6a5b8c"),"Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111"),
+
+                new Client(new Guid("4e7a2d1b-5c3f-4b9e-8d7a-2f6c1e3b9a0d"),"Тестовый клиент2", new DateTime(2001, 11, 2), "testClient2.ru", "+7 918 222 22 22", "4324 222222"),
+
+                new Client(new Guid("a6d3f1b9-7e2c-4a5b-9f8d-1c3e6b7a2d4f"),"Тестовый клиент3", new DateTime(2002, 12, 31), "testClient3.ru", "+7 918 333 33 33", "4324 333333"),
+            });
+
+            foreach (var client in clientList)
+            {
+                await clientStorage.AddAsync(client);
+            }
+
+            var clientsfromStorage = await clientStorage.GetAllAsync();
+
+            foreach (var client in clientsfromStorage)
+            {
+                foreach(var account in client.Accounts)
+                {
+                    account.PutMoney(1000);
+                }
+            }
+
+
+            //Act
+
+            var task1 = Task.Run(async () =>
+            {
+                var theWithdrawingClient = await clientService.GetAsync(new Guid(" 9f8b1c6e-2d4f-4a8a-9b2e-3f1d7e6a5b8c"));
+                var foundAccount = theWithdrawingClient.Accounts.First();
+
+                return await clientService.CashingOutMoney(theWithdrawingClient.Id, foundAccount.Id, 300);
+            });
+
+            var task2 = Task.Run(async () =>
+            {
+                var theWithdrawingClient = await clientService.GetAsync(new Guid("4e7a2d1b-5c3f-4b9e-8d7a-2f6c1e3b9a0d"));
+                var foundAccount = theWithdrawingClient.Accounts.First();
+
+                return await clientService.CashingOutMoney(theWithdrawingClient.Id, foundAccount.Id, 100);
+            });
+
+            var task3 = Task.Run(async () =>
+            {
+                var theWithdrawingClient = await clientService.GetAsync(new Guid("a6d3f1b9-7e2c-4a5b-9f8d-1c3e6b7a2d4f"));
+                var foundAccount = theWithdrawingClient.Accounts.First();
+
+                return await clientService.CashingOutMoney(theWithdrawingClient.Id, foundAccount.Id,1100);
+            });
+
+            var result = await Task.WhenAll(task1, task2, task3);
+
+            //Assert
+            Assert.Equal(700, clientsfromStorage.FirstOrDefault(c => c.Id == new Guid(" 9f8b1c6e-2d4f-4a8a-9b2e-3f1d7e6a5b8c")).Accounts.First().Amount);
+            Assert.Equal(900, clientsfromStorage.FirstOrDefault(c => c.Id == new Guid("4e7a2d1b-5c3f-4b9e-8d7a-2f6c1e3b9a0d")).Accounts.First().Amount);
+            Assert.Equal(1000, clientsfromStorage.FirstOrDefault(c => c.Id == new Guid("a6d3f1b9-7e2c-4a5b-9f8d-1c3e6b7a2d4f")).Accounts.First().Amount);
+            Assert.True(result[0]);
+            Assert.True(result[1]);
+            Assert.False(result[2]);
+        }
+
+
+        [Fact]
+        public async Task AddClient_Count_10()
         {
             //Arrange
-            IClientStorage FakeClientStorage = new FakeClientStorage();
-            ClientService clientService = new ClientService(FakeClientStorage);
+            IClientStorage clientStorage = new ClientStorage();
+            ClientService clientService = new ClientService(clientStorage);
 
             List<Client> clientList = new List<Client>(); //10
             clientList.AddRange(new Client[]
@@ -48,12 +120,12 @@ namespace BankSystem.App.Tests
 
             foreach (var client in clientList)
             {
-                clientService.AddClient(client);
+                await clientService.AddClientAsync(client);
             }
 
 
             //Act 
-            var clients = FakeClientStorage.GetAll();
+            var clients = await clientStorage.GetAllAsync();
             int result = clients.Count;
 
             //Assert
@@ -63,21 +135,21 @@ namespace BankSystem.App.Tests
         }
 
         [Fact]
-        public void UpdateClient_Test()
+        public async Task UpdateClient_Test()
         {
             //Arrange
-            IClientStorage FakeClientStorage = new FakeClientStorage();
-            ClientService clientService = new ClientService(FakeClientStorage);
+            IClientStorage clientStorage = new ClientStorage();
+            ClientService clientService = new ClientService(clientStorage);
 
             Guid testId = Guid.NewGuid();
 
             Client testClient = new Client(testId, "Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
-            clientService.AddClient(testClient);
+            await clientService.AddClientAsync(testClient);
 
             Client newDataClient = new Client(testId, "Тестовый клиент111", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
 
             //Act
-            clientService.UpdateClient(testId, newDataClient);
+            clientService.UpdateClientAsync(testId, newDataClient);
 
             //Assert
             Assert.NotEqual(testClient, newDataClient);
@@ -85,11 +157,11 @@ namespace BankSystem.App.Tests
         }
 
         [Fact]
-        public void DeleteClient_Test()
+        public async Task DeleteClient_Test()
         {
             //Arrange
-            IClientStorage fakeClientStorage = new FakeClientStorage();
-            ClientService clientService = new ClientService(fakeClientStorage);
+            IClientStorage clientStorage = new ClientStorage();
+            ClientService clientService = new ClientService(clientStorage);
 
             Guid testId = Guid.NewGuid();
 
@@ -120,26 +192,27 @@ namespace BankSystem.App.Tests
 
             foreach (var client in clientList)
             {
-                clientService.AddClient(client);
+                await clientService.AddClientAsync(client);
             }
 
-            Client client1 = fakeClientStorage.Get(testId);
+            Client client1 = await clientStorage.GetAsync(testId);
 
             //Act
-            clientService.DeleteClient(client1.Id);
-            bool result = fakeClientStorage.GetAll().Any(x => x.Id == testId);
+            clientService.DeleteClientAsync(client1.Id);
+            var allClients = await clientStorage.GetAllAsync();
+            bool result = allClients.Any(x => x.Id == testId);
 
             //Assert
-            Assert.Equal(9, fakeClientStorage.GetAll().Count);
+            Assert.Equal(9, allClients.Count);
             Assert.False(result);
 
         }
         [Fact]
-        public void AddAccountForActiveClient_Account_Count_2()
+        public async Task AddAccountForActiveClient_Account_Count_2()
         {
             //Arrange 
-            IClientStorage fakeClientStorage = new FakeClientStorage();
-            ClientService clientService = new ClientService(fakeClientStorage);
+            IClientStorage clientStorage = new ClientStorage();
+            ClientService clientService = new ClientService(clientStorage);
 
             Guid testGuid = Guid.NewGuid();
             List<Client> clientList = new List<Client>(); //10
@@ -169,7 +242,7 @@ namespace BankSystem.App.Tests
 
             foreach (var cl in clientList)
             {
-                clientService.AddClient(cl);
+                await clientService.AddClientAsync(cl);
             }
 
             Account newAccount = new Account(testGuid, new Currency("RUB", '#'), 50000, "111 111 111");
@@ -177,14 +250,14 @@ namespace BankSystem.App.Tests
 
 
             //Act 
-            Client clientTest = fakeClientStorage.Get(testGuid);
-            bool resaltOperation = clientService.AddAccountToClient(clientTest.Id, newAccount);
+            Client clientTest = await clientStorage.GetAsync(testGuid);
+            bool resaltOperation = await clientService.AddAccountToClientAsync(clientTest.Id, newAccount);
 
 
             // Act & Assert
-            Assert.Throws<ClientNotFoundException>(() =>
+            await Assert.ThrowsAsync<ClientNotFoundException>(async () =>
             {
-                clientService.AddAccountToClient(Fakeclient.Id, newAccount);
+                await clientService.AddAccountToClientAsync(Fakeclient.Id, newAccount);
             });
 
             //Assert
@@ -193,11 +266,11 @@ namespace BankSystem.App.Tests
         }
 
         [Fact]
-        public void UpdateAccount_Amount_6000()
+        public async Task UpdateAccount_Amount_6000()
         {
             //Arrange 
-            IClientStorage fakeClientStorage = new FakeClientStorage();
-            ClientService clientService = new ClientService(fakeClientStorage);
+            IClientStorage clientStorage = new ClientStorage();
+            ClientService clientService = new ClientService(clientStorage);
 
             Guid testGuid = Guid.NewGuid();
             List<Client> clientList = new List<Client>(); //10
@@ -227,15 +300,15 @@ namespace BankSystem.App.Tests
 
             foreach (var cl in clientList)
             {
-                clientService.AddClient(cl);
+                await clientService.AddClientAsync(cl);
             }
 
 
             //Act 
             Account UpdateAcc = new Account(testGuid, new Currency("EUR", '€'), 6000);
-            bool result = clientService.UpdateAccount(testGuid, "111 111 111", UpdateAcc);
+            bool result = await clientService.UpdateAccountAsync(testGuid, "111 111 111", UpdateAcc);
 
-            var client = fakeClientStorage.Get(testGuid);
+            var client = await clientStorage.GetAsync(testGuid);
             client.Accounts.Sort((a, b) => a.Amount.CompareTo(b.Amount));
 
 
@@ -247,31 +320,31 @@ namespace BankSystem.App.Tests
         }
 
         [Fact]
-        public void DeleteAccount_Test()
+        public async Task DeleteAccount_Test()
         {
             //Arrange
-            IClientStorage FakeClientStorage = new FakeClientStorage();
-            ClientService clientService = new ClientService(FakeClientStorage);
+            IClientStorage clientStorage = new ClientStorage();
+            ClientService clientService = new ClientService(clientStorage);
 
             Guid testId = Guid.NewGuid();
 
             Client testClient = new Client(testId, "Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
-            clientService.AddClient(testClient);
-            clientService.AddAccountToClient(testClient.Id, new Account(testClient.Id, new Currency("USD", '$'), 4000, "123"));
+            await clientService.AddClientAsync(testClient);
+            clientService.AddAccountToClientAsync(testClient.Id, new Account(testClient.Id, new Currency("USD", '$'), 4000, "123"));
 
             //Act
-            bool result = clientService.DeleteAccount(testClient.Id, "123");
+            bool result = await clientService.DeleteAccountAsync(testClient.Id, "123");
 
             //Assert
             Assert.True(result);
         }
 
         [Fact]
-        public void GetFilterClients()
+        public async Task GetFilterClients()
         {
             //Arrange 
-            IClientStorage fakeClientStorage = new FakeClientStorage();
-            ClientService clientService = new ClientService(fakeClientStorage);
+            IClientStorage clientStorage = new ClientStorage();
+            ClientService clientService = new ClientService(clientStorage);
 
             List<Client> clientList = new List<Client>(); //10
             clientList.AddRange(new Client[]
@@ -300,7 +373,7 @@ namespace BankSystem.App.Tests
 
             foreach (var cl in clientList)
             {
-                clientService.AddClient(cl);
+                await clientService.AddClientAsync(cl);
             }
 
 
@@ -313,8 +386,8 @@ namespace BankSystem.App.Tests
                 BirthDateTo = new DateTime(2002, 1, 1)
             };
 
-            var filterClients = clientService.GetFilterClients(filter, 1).Items;
-
+            var filterResult = await clientService.GetFilterClientsAsync(filter, 1);
+            var filterClients = filterResult.Items;
 
             //Assert
             Assert.Equal(4, filterClients.Count);
