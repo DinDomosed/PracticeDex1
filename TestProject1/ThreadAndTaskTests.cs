@@ -85,7 +85,7 @@ namespace BankSystem.App.Tests
                             {
                                 string fileName = $"TestFile_{_currentFileIndex}.csv";
 
-                                ExportService exportService = new ExportService(basePath, fileName);
+                                ExportService<Client> exportService = new ExportService<Client>(basePath, fileName);
                                 exportService.ExportClientToCvsFile(buffer);
                                 buffer.Clear();
 
@@ -113,7 +113,7 @@ namespace BankSystem.App.Tests
                         //Формируем имя актуального файла и записиваем буффер в него
                         string exactFileName = $"TestFile_{_currentFileIndex}.csv";
 
-                        ExportService export = new ExportService(basePath, exactFileName);
+                        ExportService<Client> export = new ExportService<Client>(basePath, exactFileName);
                         export.ExportClientToCvsFile(buffer);
 
                         buffer.Clear();
