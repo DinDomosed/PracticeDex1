@@ -26,10 +26,13 @@ namespace ExportTool
         protected string PathToDirectory { get; private set; }
         protected string FileName { get; private set; }
 
-        public ExportService(string pathToDirectory, string fileName)
+        private readonly ClientService _clientService;
+
+        public ExportService(string pathToDirectory, string fileName, ClientService clientService)
         {
             PathToDirectory = pathToDirectory;
             FileName = fileName;
+            _clientService = clientService;
         }
         public bool ExportClientToCvsFile(List<Client> data)
         {
@@ -112,36 +115,32 @@ namespace ExportTool
                                 dto.PassportNumber
                                 )).ToList();
 
-                            using (BankSystemDbContext dbContext = new BankSystemDbContext())
-                            {
-                                ClientDbStorage dbStorage = new ClientDbStorage(dbContext);
-                                ClientService service = new ClientService(dbStorage);
 
-                                foreach (var record in records)
+                            foreach (var record in records)
+                            {
+                                try
                                 {
-                                    try
-                                    {
-                                        await service.AddClientAsync(record);
-                                    }
-                                    catch (PassportNumberNullOrWhiteSpaceException passportEx)
-                                    {
-                                        continue;
-                                    }
-                                    catch (InvalidClientAgeException InvalidAgeEx)
-                                    {
-                                        continue;
-                                    }
-                                    catch (ArgumentNullException ArgNullEx)
-                                    {
-                                        continue;
-                                    }
-                                    catch (ArgumentException argEx)
-                                    {
-                                        continue;
-                                    }
+                                    await _clientService.AddClientAsync(record);
                                 }
-                                return true;
+                                catch (PassportNumberNullOrWhiteSpaceException passportEx)
+                                {
+                                    continue;
+                                }
+                                catch (InvalidClientAgeException InvalidAgeEx)
+                                {
+                                    continue;
+                                }
+                                catch (ArgumentNullException ArgNullEx)
+                                {
+                                    continue;
+                                }
+                                catch (ArgumentException argEx)
+                                {
+                                    continue;
+                                }
                             }
+                            return true;
+
                         }
                     }
                 }
@@ -170,7 +169,7 @@ namespace ExportTool
                 Formatting = Formatting.Indented,
                 TypeNameHandling = TypeNameHandling.All,
                 NullValueHandling = NullValueHandling.Ignore
-                
+
             };
 
             string jsonPerson = JsonConvert.SerializeObject(person, settings);
@@ -188,7 +187,7 @@ namespace ExportTool
 
             string fullPath = Path.Combine(PathToDirectory, FileName);
 
-            using FileStream fileStream = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, useAsync:true);
+            using FileStream fileStream = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, useAsync: true);
             using StreamWriter streamWriter = new StreamWriter(fileStream);
             using (JsonTextWriter writer = new JsonTextWriter(streamWriter))
             {
@@ -229,7 +228,7 @@ namespace ExportTool
             {
                 ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver
                 {
-                    DefaultMembersSearchFlags  =
+                    DefaultMembersSearchFlags =
                     System.Reflection.BindingFlags.Public |
                     System.Reflection.BindingFlags.NonPublic |
                     System.Reflection.BindingFlags.Instance
@@ -254,10 +253,10 @@ namespace ExportTool
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException($"Файл '{FileName}' не найден по пути '{fullPath}'.");
 
-            
+
             using FileStream fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             using StreamReader streamReader = new StreamReader(fileStream);
-            using(JsonTextReader  reader = new JsonTextReader(streamReader))
+            using (JsonTextReader reader = new JsonTextReader(streamReader))
             {
                 JsonSerializer serializer = new JsonSerializer
                 {

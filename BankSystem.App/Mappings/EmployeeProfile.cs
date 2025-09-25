@@ -66,7 +66,42 @@ namespace BankSystem.App.Mappings
                 return true;
             }));
 
+            CreateMap<EmployeeContractDtoForGet, EmployeeContract>()
+                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember, destMember) =>
+                 {
+                     if (srcMember is string s && string.IsNullOrWhiteSpace(s))
+                         return false;
+
+                     if (srcMember != null && srcMember.Equals(destMember))
+                         return false;
+
+                     if (srcMember == null)
+                         return false;
+
+                     return true;
+                 }));
+
+
+            CreateMap<EmployeeDtoForGet, Employee>()
+                .ForMember(c => c.ClientProfile, opt => opt.Ignore())
+                .ForMember(c => c.ClientId, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember, destMember) =>
+                 {
+                     if (srcMember is string s && string.IsNullOrWhiteSpace(s))
+                         return false;
+
+                     if (srcMember != null && srcMember.Equals(destMember))
+                         return false;
+
+                     if (srcMember == null)
+                         return false;
+
+                     return true;
+                 }));
+
             CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
+
+
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BankSystem.App.Services;
 using BankSystem.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankSystem.App.Tests
 {
@@ -17,7 +18,11 @@ namespace BankSystem.App.Tests
         public async Task RateUpdater_Test()
         {
             //Arrange
-            using BankSystemDbContext dbContext = new BankSystemDbContext();
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb_Rate")
+                .Options;
+
+            using BankSystemDbContext dbContext = new BankSystemDbContext(options);
             IClientStorage clientStorage = new ClientDbStorage(dbContext);
             IDateTimeProvider dateProvider = new FakeSystemDateTimeProvider(null);
 

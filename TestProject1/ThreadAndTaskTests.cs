@@ -15,6 +15,12 @@ using System.Text;
 using System.Threading.Tasks;
 using BankSystem.App.DTOs;
 using ExportTool.Maps;
+using BankSystem.Data.Storages;
+using BankSystem.Data;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using BankSystem.App.Mappings;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BankSystem.App.Tests
 {
@@ -31,6 +37,22 @@ namespace BankSystem.App.Tests
         public void Pipeline_ShouldProcessClientsAndWriteMultipleFiles_Test()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var configMapps = new MapperConfiguration(configExpression, new NullLoggerFactory());
+
+            IMapper mapper = configMapps.CreateMapper();
+
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb")
+                .Options;
+
+            BankSystemDbContext context = new BankSystemDbContext(options);
+            ClientDbStorage storage = new ClientDbStorage(context);
+            ClientService service = new ClientService(storage, mapper);
 
             // Создаём директорию и удаляем все ранее созданные тестовые файлы
             string basePath = Path.Combine("D:", "TestDIRECTORY");
@@ -85,7 +107,7 @@ namespace BankSystem.App.Tests
                             {
                                 string fileName = $"TestFile_{_currentFileIndex}.csv";
 
-                                ExportService<Client> exportService = new ExportService<Client>(basePath, fileName);
+                                ExportService<Client> exportService = new ExportService<Client>(basePath, fileName, service);
                                 exportService.ExportClientToCvsFile(buffer);
                                 buffer.Clear();
 
@@ -113,7 +135,7 @@ namespace BankSystem.App.Tests
                         //Формируем имя актуального файла и записиваем буффер в него
                         string exactFileName = $"TestFile_{_currentFileIndex}.csv";
 
-                        ExportService<Client> export = new ExportService<Client>(basePath, exactFileName);
+                        ExportService<Client> export = new ExportService<Client>(basePath, exactFileName, service);
                         export.ExportClientToCvsFile(buffer);
 
                         buffer.Clear();

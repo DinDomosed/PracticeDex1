@@ -23,16 +23,16 @@ namespace BankSystem.Data
 
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder dbOptionsBuilder)
-        {
+        //protected override void OnConfiguring(DbContextOptionsBuilder dbOptionsBuilder)
+        //{
             
-            dbOptionsBuilder.UseNpgsql(
-                "Host=localhost;" +
-                "Port=5432;" +
-                "Database=dbBankSystem;" +
-                "Username=postgres;" +
-                "Password=Diana123");
-        }
+        //    dbOptionsBuilder.UseNpgsql(
+        //        "Host=localhost;" +
+        //        "Port=5432;" +
+        //        "Database=dbBankSystem;" +
+        //        "Username=postgres;" +
+        //        "Password=Diana123");
+        //}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new ClientEntityTypeConfiguration());

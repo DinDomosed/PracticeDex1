@@ -1,9 +1,12 @@
-﻿using BankSystem.App.DTOs.DTosForRequestsToControllersEmployee;
+﻿using AutoMapper;
+using BankSystem.App.DTOs.DTosForRequestsToControllersEmployee;
 using BankSystem.App.Exceptions;
 using BankSystem.App.Interfaces;
+using BankSystem.App.Mappings;
 using BankSystem.App.Services;
 using BankSystem.Data.Storages;
 using BankSystem.Domain.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +21,15 @@ namespace BankSystem.App.Tests
         public async Task AddEmployee_Test_Count_9()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+            var config = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = config.CreateMapper();
 
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(EmployeeStorage);
+            EmployeeService employeeService = new EmployeeService(EmployeeStorage, mapper);
 
             List<Employee> employees = new List<Employee>()
             {
@@ -77,8 +86,16 @@ namespace BankSystem.App.Tests
         public async Task UpdateEmployee_Test()
         {
             //Arrange 
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var config = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = config.CreateMapper();
+
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(EmployeeStorage);
+            EmployeeService employeeService = new EmployeeService(EmployeeStorage, mapper);
 
             Guid TestId = Guid.NewGuid();
             List<Employee> employees = new List<Employee>()
@@ -115,17 +132,23 @@ namespace BankSystem.App.Tests
             {
                 await employeeService.AddEmployeeAsync(emp);
             }
-            Employee employeeTest = await EmployeeStorage.GetAsync(TestId);
 
 
             //Act 
-            Employee newDataEmployee = new Employee(TestId, "Тестовый сотрудник1000", new DateTime(2000, 9, 6),
-                new EmployeeContract(new DateTime(2025, 7, 1), new DateTime(2070, 7, 1), 5000, "Бекенд разработчик"), "4324 111111");
 
-            await employeeService.UpdateEmployeeAsync(newDataEmployee.Id, newDataEmployee);
+            EmployeeDtoForPut employeeDto = new EmployeeDtoForPut()
+            {
+                FullName = "Тестовый сотрудник1000",
+                PassportNumber = "4324 111111"
+            };
+
+            await employeeService.UpdateEmployeeAsync(TestId, employeeDto);
+            
+            Employee employeeTest = await EmployeeStorage.GetAsync(TestId);
 
             //Assert
-            Assert.NotEqual(employeeTest.FullName, newDataEmployee.FullName);
+            Assert.Equal(employeeDto.FullName, employeeTest.FullName);
+            Assert.NotEqual("Тестовый сотрудник1", employeeTest.FullName);
 
         }
 
@@ -133,8 +156,16 @@ namespace BankSystem.App.Tests
         public async Task DeleteEmployee_Test()
         {
             //Arrange 
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var config = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = config.CreateMapper();
+
             IEmployeeStorage employeeStorage = new EmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(employeeStorage);
+            EmployeeService employeeService = new EmployeeService(employeeStorage, mapper);
 
             Guid TestId = Guid.NewGuid();
             List<Employee> employees = new List<Employee>()//9
@@ -188,8 +219,17 @@ namespace BankSystem.App.Tests
         public async Task UpdateEmployeeContract_Test_Equal_True()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var config = new MapperConfiguration(configExpression, new NullLoggerFactory());
+
+            IMapper mapper = config.CreateMapper();
+
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(EmployeeStorage);
+            EmployeeService employeeService = new EmployeeService(EmployeeStorage, mapper);
             Guid guidTest = Guid.NewGuid();
 
             List<Employee> employees = new List<Employee>()
@@ -226,10 +266,18 @@ namespace BankSystem.App.Tests
             {
                 await employeeService.AddEmployeeAsync(employee);
             }
-            EmployeeContract newContract = new EmployeeContract(new DateTime(2020, 6, 24), new DateTime(3000, 1, 1), 3500, "Бекенд разработчик");
+            
+
+            EmployeeContractDtoForPut contractDto = new EmployeeContractDtoForPut()
+            {
+                StartOfWork = new DateTime(2020, 6, 24),
+                EndOfContract = new DateTime(3000, 1, 1),
+                Post = "Бекенд разработчик",
+                Salary = 3500
+            };
 
             //Act
-            await employeeService.UpdateEmployeeContractAsync(guidTest, newContract);
+            await employeeService.UpdateEmployeeContractAsync(guidTest, contractDto);
 
             var foundEmployee = await EmployeeStorage.GetAsync(guidTest);
 
@@ -243,8 +291,16 @@ namespace BankSystem.App.Tests
         public async Task GetFilterEmployee_Test_Count_4_5()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+            var config = new MapperConfiguration(configExpression, new NullLoggerFactory());
+
+            IMapper mapper = config.CreateMapper();
+
             IEmployeeStorage EmployeeStorage = new EmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(EmployeeStorage);
+            EmployeeService employeeService = new EmployeeService(EmployeeStorage, mapper);
 
             List<Employee> employees = new List<Employee>()
             {
@@ -298,7 +354,7 @@ namespace BankSystem.App.Tests
             var resultFilter1 = await employeeService.GetFilterEmployeeAsync(filter1, 1, 10);
             var resultfilter2 = await employeeService.GetFilterEmployeeAsync(filter2, 1);
 
-            List<Employee> filterEmployee = resultFilter1.Items;
+            List<Employee> filterEmployee = mapper.Map<List<Employee>>(resultFilter1.Items);
             var filterEmployee2 = resultfilter2.Items;
 
             filterEmployee = filterEmployee.OrderBy(u => u.ContractEmployee.Salary).ToList();
@@ -325,8 +381,15 @@ namespace BankSystem.App.Tests
         public async Task CreateAccountProfile_Test()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+            var config = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = config.CreateMapper();
+
             IEmployeeStorage employeeStorage = new EmployeeStorage();
-            EmployeeService employeeService = new EmployeeService(employeeStorage);
+            EmployeeService employeeService = new EmployeeService(employeeStorage, mapper);
 
             Guid TestId = Guid.NewGuid();
             Employee employeeTest = new Employee(TestId, "Тестовый сотрудник1", new DateTime(2006, 9, 6),

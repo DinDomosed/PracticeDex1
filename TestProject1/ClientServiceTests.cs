@@ -1,15 +1,19 @@
-﻿using System;
+﻿using AutoMapper;
+using BankSystem.App.DTOs.DTOsAccounts;
+using BankSystem.App.DTOs.DTOsForRequestsToControllers;
+using BankSystem.App.Exceptions;
+using BankSystem.App.Interfaces;
+using BankSystem.App.Mappings;
+using BankSystem.App.Services;
+using BankSystem.Data.Storages;
+using BankSystem.Domain.Models;
+using Microsoft.Extensions.Logging.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using BankSystem.App.DTOs.DTOsForRequestsToControllers;
-using BankSystem.App.Exceptions;
-using BankSystem.App.Interfaces;
-using BankSystem.App.Services;
-using BankSystem.Data.Storages;
-using BankSystem.Domain.Models;
 
 namespace BankSystem.App.Tests
 {
@@ -19,8 +23,16 @@ namespace BankSystem.App.Tests
         public async Task CashingOutMoney_memoryTest()
         {
             //Arrange 
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var configMapps = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = configMapps.CreateMapper();
+
             IClientStorage clientStorage = new ClientStorage();
-            ClientService clientService = new ClientService(clientStorage);
+            ClientService clientService = new ClientService(clientStorage, mapper);
 
             List<Client> clientList = new List<Client>();
             clientList.AddRange(new Client[]
@@ -41,7 +53,7 @@ namespace BankSystem.App.Tests
 
             foreach (var client in clientsfromStorage)
             {
-                foreach(var account in client.Accounts)
+                foreach (var account in client.Accounts)
                 {
                     account.PutMoney(1000);
                 }
@@ -71,7 +83,7 @@ namespace BankSystem.App.Tests
                 var theWithdrawingClient = await clientService.GetAsync(new Guid("a6d3f1b9-7e2c-4a5b-9f8d-1c3e6b7a2d4f"));
                 var foundAccount = theWithdrawingClient.Accounts.First();
 
-                return await clientService.CashingOutMoney(theWithdrawingClient.Id, foundAccount.Id,1100);
+                return await clientService.CashingOutMoney(theWithdrawingClient.Id, foundAccount.Id, 1100);
             });
 
             var result = await Task.WhenAll(task1, task2, task3);
@@ -90,8 +102,17 @@ namespace BankSystem.App.Tests
         public async Task AddClient_Count_10()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var configMapps = new MapperConfiguration(configExpression, new NullLoggerFactory());
+
+            IMapper mapper = configMapps.CreateMapper();
+
             IClientStorage clientStorage = new ClientStorage();
-            ClientService clientService = new ClientService(clientStorage);
+            ClientService clientService = new ClientService(clientStorage, mapper);
 
             List<Client> clientList = new List<Client>(); //10
             clientList.AddRange(new Client[]
@@ -138,8 +159,17 @@ namespace BankSystem.App.Tests
         public async Task UpdateClient_Test()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var configMapps = new MapperConfiguration(configExpression, new NullLoggerFactory());
+
+            IMapper mapper = configMapps.CreateMapper();
+
             IClientStorage clientStorage = new ClientStorage();
-            ClientService clientService = new ClientService(clientStorage);
+            ClientService clientService = new ClientService(clientStorage, mapper);
 
             Guid testId = Guid.NewGuid();
 
@@ -148,8 +178,15 @@ namespace BankSystem.App.Tests
 
             Client newDataClient = new Client(testId, "Тестовый клиент111", new DateTime(2000, 9, 6), "testClient1.ru", "+7 918 111 11 11", "4324 111111");
 
+            var ClientDtoForPut = new ClientDtoForPut()
+            {
+                Email = "testClient1.ru",
+                FullName = "Тестовый клиент111",
+                PassportNumber = "4324 111111",
+                PhoneNumber = "+7 918 111 11 11"
+            };
             //Act
-            clientService.UpdateClientAsync(testId, newDataClient);
+            clientService.UpdateClientAsync(testId, ClientDtoForPut);
 
             //Assert
             Assert.NotEqual(testClient, newDataClient);
@@ -160,8 +197,17 @@ namespace BankSystem.App.Tests
         public async Task DeleteClient_Test()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var configMapps = new MapperConfiguration(configExpression, new NullLoggerFactory());
+
+            IMapper mapper = configMapps.CreateMapper();
+
             IClientStorage clientStorage = new ClientStorage();
-            ClientService clientService = new ClientService(clientStorage);
+            ClientService clientService = new ClientService(clientStorage, mapper);
 
             Guid testId = Guid.NewGuid();
 
@@ -211,8 +257,17 @@ namespace BankSystem.App.Tests
         public async Task AddAccountForActiveClient_Account_Count_2()
         {
             //Arrange 
+
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var configMapps = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = configMapps.CreateMapper();
+
             IClientStorage clientStorage = new ClientStorage();
-            ClientService clientService = new ClientService(clientStorage);
+            ClientService clientService = new ClientService(clientStorage, mapper);
 
             Guid testGuid = Guid.NewGuid();
             List<Client> clientList = new List<Client>(); //10
@@ -269,8 +324,16 @@ namespace BankSystem.App.Tests
         public async Task UpdateAccount_Amount_6000()
         {
             //Arrange 
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var config = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = config.CreateMapper();
+
             IClientStorage clientStorage = new ClientStorage();
-            ClientService clientService = new ClientService(clientStorage);
+            ClientService clientService = new ClientService(clientStorage, mapper);
 
             Guid testGuid = Guid.NewGuid();
             List<Client> clientList = new List<Client>(); //10
@@ -305,8 +368,18 @@ namespace BankSystem.App.Tests
 
 
             //Act 
-            Account UpdateAcc = new Account(testGuid, new Currency("EUR", '€'), 6000);
-            bool result = await clientService.UpdateAccountAsync(testGuid, "111 111 111", UpdateAcc);
+
+            AccountDtoForPut accountDto = new AccountDtoForPut()
+            {
+                Amount = 6000,
+                Currency = new CurrencyDtoForPut()
+                {
+                    Code = "EUR",
+                    Symbol = '€'
+
+                }
+            };
+            bool result = await clientService.UpdateAccountAsync(testGuid, "111 111 111", accountDto);
 
             var client = await clientStorage.GetAsync(testGuid);
             client.Accounts.Sort((a, b) => a.Amount.CompareTo(b.Amount));
@@ -323,8 +396,15 @@ namespace BankSystem.App.Tests
         public async Task DeleteAccount_Test()
         {
             //Arrange
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+            var configMapps = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = configMapps.CreateMapper();
+
             IClientStorage clientStorage = new ClientStorage();
-            ClientService clientService = new ClientService(clientStorage);
+            ClientService clientService = new ClientService(clientStorage, mapper);
 
             Guid testId = Guid.NewGuid();
 
@@ -343,8 +423,16 @@ namespace BankSystem.App.Tests
         public async Task GetFilterClients()
         {
             //Arrange 
+            var configExpression = new MapperConfigurationExpression();
+            configExpression.AddProfile<ClientProfile>();
+            configExpression.AddProfile<EmployeeProfile>();
+            configExpression.AddProfile<AccountProfile>();
+
+            var config = new MapperConfiguration(configExpression, new NullLoggerFactory());
+            IMapper mapper = config.CreateMapper();
+
             IClientStorage clientStorage = new ClientStorage();
-            ClientService clientService = new ClientService(clientStorage);
+            ClientService clientService = new ClientService(clientStorage, mapper);
 
             List<Client> clientList = new List<Client>(); //10
             clientList.AddRange(new Client[]

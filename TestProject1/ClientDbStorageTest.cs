@@ -3,6 +3,7 @@ using BankSystem.App.Services;
 using BankSystem.Data;
 using BankSystem.Data.Storages;
 using BankSystem.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,12 @@ namespace BankSystem.App.Tests
         public async Task Add_Test()
         {
             //Arrange 
-            BankSystemDbContext dbContext = new BankSystemDbContext();
+
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb")
+                .Options;
+
+            using BankSystemDbContext dbContext = new BankSystemDbContext(options);
             ClientDbStorage dbStorageClient = new ClientDbStorage(dbContext);
             TestDataGenerator generator = new TestDataGenerator();
 
@@ -36,8 +42,16 @@ namespace BankSystem.App.Tests
         public async Task Update_Test()
         {
             //Arrange
-            BankSystemDbContext dbcontext = new BankSystemDbContext();
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb")
+                .Options;
+
+            using BankSystemDbContext dbcontext = new BankSystemDbContext(options);
             ClientDbStorage dbStorageClient = new ClientDbStorage(dbcontext);
+
+            Client oldDataClient = new Client(Guid.Parse("43f12e09-d109-4f33-ba54-4d16884ff3e6"), "Тестовый клиент1", new DateTime(2000, 9, 6), "testClient1.ru",
+                "+7 918 111 13 11", "4324 111111");
+            await dbStorageClient.AddAsync(oldDataClient);
 
             //Act
             Client newDataClient = new Client(Guid.Parse("43f12e09-d109-4f33-ba54-4d16884ff3e6"), "Супер-Ультра ITшник", new DateTime(2000, 9, 6), "tiktik@mail.ru",
@@ -56,7 +70,11 @@ namespace BankSystem.App.Tests
         public async Task Delete_test()
         {
             //Arrange
-            BankSystemDbContext dbContext = new BankSystemDbContext();
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb")
+                .Options;
+
+            using BankSystemDbContext dbContext = new BankSystemDbContext(options);
             ClientDbStorage dbStorage = new ClientDbStorage(dbContext);
 
 
@@ -66,7 +84,7 @@ namespace BankSystem.App.Tests
             //Act
             bool result = await dbStorage.DeleteAsync(Guid.Parse("f47ac10b-58cc-4372-a567-0e02b2c3d479"));
 
-            using var dbContext2 = new BankSystemDbContext();
+            using var dbContext2 = new BankSystemDbContext(options);
             var dbStorage2 = new ClientDbStorage(dbContext2);
             var notfoundClient = await dbStorage2.GetAsync(Guid.Parse("f47ac10b-58cc-4372-a567-0e02b2c3d479"));
 
@@ -80,8 +98,17 @@ namespace BankSystem.App.Tests
         public async Task AddAccount_Test()
         {
             //Arrange
-            BankSystemDbContext dbContext = new BankSystemDbContext();
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb")
+                .Options;
+
+            using BankSystemDbContext dbContext = new BankSystemDbContext(options);
             ClientDbStorage dbStorage = new ClientDbStorage(dbContext);
+
+            var testClient = new Client(Guid.Parse("13a82352-10dd-4f0b-bdc3-c5b0c0c52daf"), "Тестовый клиент", new DateTime(2000, 1, 1),
+                "test@mai.ru", "+79185554455", "3245 43232");
+
+            await dbStorage.AddAsync(testClient);
 
             Account newAccount = new Account(Guid.Parse("13a82352-10dd-4f0b-bdc3-c5b0c0c52daf"), new Currency("RUB", '₽'), 6000);
             //Act
@@ -95,8 +122,19 @@ namespace BankSystem.App.Tests
         public async Task UpdateAccount_Test()
         {
             //Arrange
-            BankSystemDbContext dbContext = new BankSystemDbContext();
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb_UpAccount")
+                .Options;
+
+            using BankSystemDbContext dbContext = new BankSystemDbContext(options);
             ClientDbStorage dbStorage = new ClientDbStorage(dbContext);
+
+            var testClient = new Client(Guid.Parse("4c9b91bf-281e-4fbd-8973-0f04d1746774"), "Тестовый клиент", new DateTime(2000, 1, 1),
+                "test@mai.ru", "+79185554455", "3245 43232");
+            var testAccount = new Account(testClient.Id, new Currency("USD", '$'), 4000, "4081193022794");
+
+            await dbStorage.AddAsync(testClient);
+            await dbStorage.AddAccountAsync(testClient.Id, testAccount);
 
             var foundClient = await dbStorage.GetAsync(Guid.Parse("4c9b91bf-281e-4fbd-8973-0f04d1746774"));
             var oldAccount = foundClient.Accounts.FirstOrDefault(c => c.AccountNumber == "4081193022794");
@@ -118,11 +156,18 @@ namespace BankSystem.App.Tests
         public async Task DeleteAccount_test()
         {
             //Arrange
-            BankSystemDbContext dbContext = new BankSystemDbContext();
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb_DeleteAccount")
+                .Options;
+            BankSystemDbContext dbContext = new BankSystemDbContext(options);
             ClientDbStorage dbStorage = new ClientDbStorage(dbContext);
 
-            //Act
+            var testClient = new Client(Guid.Parse("ab9089a8-4484-4bf9-8264-b3d83bf4caaa"), "Тестовый клиент", new DateTime(2000, 1, 1),
+                "test@mai.ru", "+79185554455", "3245 43232");
+            await dbStorage.AddAsync(testClient);
             Account newAccount = new Account(Guid.Parse("ab9089a8-4484-4bf9-8264-b3d83bf4caaa"), new Currency("USD", '$'), 6000);
+
+            //Act
             bool result1 = await dbStorage.AddAccountAsync(Guid.Parse("ab9089a8-4484-4bf9-8264-b3d83bf4caaa"), newAccount);
             bool result = await dbStorage.DeleteAccountAsync(Guid.Parse("ab9089a8-4484-4bf9-8264-b3d83bf4caaa"), newAccount.AccountNumber);
 
@@ -134,7 +179,10 @@ namespace BankSystem.App.Tests
         public async Task GetFilterClients_Test()
         {
             //Arrange
-            BankSystemDbContext dbContext = new BankSystemDbContext();
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseNpgsql("Host=localhost;Port=5432;Database=dbBankSystem;Username=postgres;Password=Diana123")
+                .Options;
+            using BankSystemDbContext dbContext = new BankSystemDbContext(options);
             ClientDbStorage dbStorage = new ClientDbStorage(dbContext);
             ClientFilterDTO filter = new ClientFilterDTO
             {
@@ -152,8 +200,16 @@ namespace BankSystem.App.Tests
         public async Task Exists_Test()
         {
             //Arrange
-            BankSystemDbContext dbContext = new BankSystemDbContext();
+            var options = new DbContextOptionsBuilder<BankSystemDbContext>()
+                .UseInMemoryDatabase("TestDb")
+                .Options;
+            using BankSystemDbContext dbContext = new BankSystemDbContext(options);
             ClientDbStorage dbStorage = new ClientDbStorage(dbContext);
+
+            var testClient = new Client(Guid.Parse("8a5d71f1-8566-4b11-8917-fdcc44a4e8a1"), "Тестовый клиент", new DateTime(2000, 1, 1),
+               "test@mai.ru", "+79185554455", "4884 630650");
+
+            await dbStorage.AddAsync(testClient);
 
             //Act
             bool result = await dbStorage.ExistsAsync(Guid.Parse("8a5d71f1-8566-4b11-8917-fdcc44a4e8a1"), "4884 630650");
