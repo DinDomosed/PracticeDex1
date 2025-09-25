@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BankSystem.App.Common;
-using BankSystem.App.DTOs;
+using BankSystem.App.DTOs.DTosForRequestsToControllersEmployee;
 using BankSystem.Domain.Models;
 
 namespace BankSystem.App.Interfaces

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using BankSystem.App.DTOs;
+using BankSystem.App.DTOs.DTOsForRequestsToControllers;
 using BankSystem.App.Exceptions;
 using BankSystem.App.Interfaces;
 using BankSystem.App.Services;

@@ -1,5 +1,5 @@
 ﻿using BankSystem.App.Common;
-using BankSystem.App.DTOs;
+using BankSystem.App.DTOs.DTOsForRequestsToControllers;
 using BankSystem.Domain.Models;
 using System;
 using System.Collections.Generic;

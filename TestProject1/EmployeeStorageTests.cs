@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BankSystem.App.DTOs;
+using BankSystem.App.DTOs.DTOsForRequestsToControllers;
 using BankSystem.App.Interfaces;
 using BankSystem.Data.Storages;
 using BankSystem.Domain.Models;

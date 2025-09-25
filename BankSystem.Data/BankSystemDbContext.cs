@@ -18,8 +18,14 @@ namespace BankSystem.Data
         public DbSet<EmployeeContract> EmployeeContracts { get; set; } = null!;
         public DbSet<Currency> Currencies { get; set; } = null!;
 
+        public BankSystemDbContext(DbContextOptions<BankSystemDbContext> options) : base(options)
+        {
+
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder dbOptionsBuilder)
         {
+            
             dbOptionsBuilder.UseNpgsql(
                 "Host=localhost;" +
                 "Port=5432;" +

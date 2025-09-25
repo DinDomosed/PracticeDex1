@@ -1,23 +1,26 @@
-﻿using System;
+﻿using AutoMapper;
+using BankSystem.App.Common;
+using BankSystem.App.DTOs.DTosForRequestsToControllersEmployee;
+using BankSystem.App.Exceptions;
+using BankSystem.App.Interfaces;
+using BankSystem.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BankSystem.App.Common;
-using BankSystem.App.DTOs;
-using BankSystem.App.Exceptions;
-using BankSystem.App.Interfaces;
-using BankSystem.Domain.Models;
 
 namespace BankSystem.App.Services
 {
     public class EmployeeService
     {
         private readonly IEmployeeStorage _employeeStorage;
+        private readonly IMapper _mapper;
 
-        public EmployeeService(IEmployeeStorage employeeStorage)
+        public EmployeeService(IEmployeeStorage employeeStorage, IMapper mapper)
         {
             _employeeStorage = employeeStorage;
+            _mapper = mapper;
         }
         public async Task<Employee?> GetAsync(Guid id)
         {
@@ -44,27 +47,16 @@ namespace BankSystem.App.Services
 
             return await _employeeStorage.AddAsync(employee);
         }
-        public async Task<bool> UpdateEmployeeAsync(Guid id, Employee upEmployee)
+        public async Task<bool> UpdateEmployeeAsync(Guid id, EmployeeDtoForPut employeeDtoForPut)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id), "Ошибка: Некорректный ID");
 
-            if (upEmployee == null)
-                throw new ArgumentNullException("Ошибка: Сотрудник не может быть null");
-
-            int minAge = 18;
-            if (upEmployee.Age < minAge)
-                throw new InvalidEmployeeAgeException("Ошибка: Сотрудник должен быть совершеннолетним");
-
-            if (upEmployee.ContractEmployee == null)
-                throw new ArgumentNullException("У Сотрудника обязательно должен быть контракт");
-
-            if (string.IsNullOrWhiteSpace(upEmployee.PassportNumber))
-                throw new PassportNumberNullOrWhiteSpaceException("Неккоректный ввод серии и номера паспорта");
-
             var foundEmployee = await _employeeStorage.GetAsync(id);
             if (foundEmployee == null)
                 throw new EmployeeNotFoundException("Ошибка: Сотрудник не найден");
+
+            var upEmployee = _mapper.Map(employeeDtoForPut, foundEmployee);
 
             return await _employeeStorage.UpdateAsync(id, upEmployee);
         }
@@ -80,7 +72,7 @@ namespace BankSystem.App.Services
 
             return await _employeeStorage.DeleteAsync(id);
         }
-        public async Task<bool> UpdateEmployeeContractAsync(Guid id, EmployeeContract newContract)
+        public async Task<bool> UpdateEmployeeContractAsync(Guid id, EmployeeContractDtoForPut dtoUpContract)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id), "Ошибка: Некорректный ID");
@@ -90,10 +82,14 @@ namespace BankSystem.App.Services
             if (foundEmployee == null)
                 throw new EmployeeNotFoundException("Ошибка: Сотрудник не существует");
 
+            var newContract = foundEmployee.ContractEmployee;
+
+            _mapper.Map(dtoUpContract, newContract);
+
             return await _employeeStorage.UpdateContractAsync(id, newContract);
         }
 
-        public async Task<PagedResult<Employee>> GetFilterEmployeeAsync(EmployeeFilterDTO filter, int page, int pageSize = 10)
+        public async Task<PagedResult<EmployeeDtoForGet>> GetFilterEmployeeAsync(EmployeeFilterDTO filter, int page, int pageSize = 10)
         {
             if (page.Equals(default(int)))
                 throw new ArgumentException(nameof(page), "Ошибка страницы");
@@ -101,7 +97,9 @@ namespace BankSystem.App.Services
             if (pageSize.Equals(default(int)))
                 throw new ArgumentException(nameof(pageSize), "Ошибка: некорректный размер страницы");
 
-            return await _employeeStorage.GetFilterEmployeesAsync(filter, page, pageSize);
+            var resultEmployee = await _employeeStorage.GetFilterEmployeesAsync(filter, page, pageSize);
+
+            return _mapper.Map<PagedResult<EmployeeDtoForGet>>(resultEmployee);
         }
 
         public async Task<bool> CreateAccountProfileAsync(Guid employeeId, Currency currency, string email, string phoneNumber)

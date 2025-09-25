@@ -1,5 +1,5 @@
 ﻿using BankSystem.App.Common;
-using BankSystem.App.DTOs;
+using BankSystem.App.DTOs.DTOsForRequestsToControllers;
 using BankSystem.App.Exceptions;
 using BankSystem.App.Interfaces;
 using BankSystem.Domain.Models;
@@ -162,8 +162,8 @@ namespace BankSystem.Data.Storages
 
 
 
-            var dbCurrency = _dbContext.Currencies.Local.FirstOrDefault(c => c.Code == account.Currency.Code)
-                ?? await _dbContext.Currencies.FirstOrDefaultAsync(c => c.Code == account.Currency.Code);
+            var dbCurrency = //_dbContext.Currencies.Local.FirstOrDefault(c => c.Code == account.Currency.Code)
+                 await _dbContext.Currencies.FirstOrDefaultAsync(c => c.Code == account.Currency.Code);
 
             if (dbCurrency == null)
             {

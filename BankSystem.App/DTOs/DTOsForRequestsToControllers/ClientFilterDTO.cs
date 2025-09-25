@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankSystem.App.DTOs
+namespace BankSystem.App.DTOs.DTOsForRequestsToControllers
 {
     public class ClientFilterDTO
     {

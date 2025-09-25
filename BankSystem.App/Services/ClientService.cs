@@ -1,25 +1,29 @@
-﻿using System;
+﻿using AutoMapper;
+using BankSystem.App.Common;
+using BankSystem.App.DTOs.DTOsAccounts;
+using BankSystem.App.DTOs.DTOsForRequestsToControllers;
+using BankSystem.App.Exceptions;
+using BankSystem.App.Interfaces;
+using BankSystem.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using BankSystem.App.Common;
-using BankSystem.App.DTOs;
-using BankSystem.App.Exceptions;
-using BankSystem.App.Interfaces;
-using BankSystem.Domain.Models;
 
 
 namespace BankSystem.App.Services
 {
     public class ClientService
     {
+        private readonly IMapper _mapper;
         private readonly IClientStorage _clientStorage;
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
-        public ClientService(IClientStorage clientStorage)
+        public ClientService(IClientStorage clientStorage, IMapper mapper)
         {
+            _mapper = mapper;
             _clientStorage = clientStorage;
         }
         
@@ -92,29 +96,22 @@ namespace BankSystem.App.Services
 
             return await _clientStorage.AddAsync(client);
         }
-        public async Task<bool> UpdateClientAsync(Guid idClient, Client client)
+        public async Task<bool> UpdateClientAsync(Guid idClient, ClientDtoForPut dtoClient)
         {
             if (idClient == Guid.Empty)
                 throw new ArgumentNullException(nameof(idClient), "Ошибка: Некорректный ID");
-
-            if (client == null)
-                throw new ArgumentNullException(nameof(client), "Ошибка: Клиент не может быть null");
 
             var foundClient = await _clientStorage.GetAsync(idClient);
 
             if (foundClient == null)
                 throw new ClientNotFoundException("Ошибка: Клиент не найден");
 
-            if (client.Age < 18)
-                throw new InvalidClientAgeException("Ошибка: Минимальный возраст клиента 18 лет");
+            if (dtoClient == null)
+                throw new ArgumentNullException("Ошибка: Некорректные данные");
 
-            if (string.IsNullOrWhiteSpace(client.PassportNumber))
-                throw new PassportNumberNullOrWhiteSpaceException("Ошибка: Неккоректный ввод серии и номера паспорта");
+            _mapper.Map(dtoClient, foundClient);
 
-            if (string.IsNullOrWhiteSpace(client.PhoneNumber))
-                throw new ArgumentException("Ошибка: Некорректный номер телефона");
-
-            return await _clientStorage.UpdateAsync(idClient, client);
+            return await _clientStorage.UpdateAsync(idClient, foundClient);
         }
         public async Task<bool> DeleteClientAsync(Guid id)
         {
@@ -142,7 +139,7 @@ namespace BankSystem.App.Services
 
             return await _clientStorage.AddAccountAsync(clientStorage.Id, newAccount);
         }
-        public async Task<bool> UpdateAccountAsync(Guid IdClient, string accountNumber, Account newAccount)
+        public async Task<bool> UpdateAccountAsync(Guid IdClient, string accountNumber, AccountDtoForPut accountDto)
         {
             var client = await _clientStorage.GetAsync(IdClient)
                 ?? throw new ClientNotFoundException("Ошибка: клиент не найден");
@@ -150,13 +147,13 @@ namespace BankSystem.App.Services
             if (string.IsNullOrWhiteSpace(accountNumber))
                 throw new ArgumentException("Ошибка: некорректный номер счета");
 
-            if (!client.Accounts.Any(u => u.AccountNumber == accountNumber))
+            var dbAcc = client.Accounts.FirstOrDefault(c => c.AccountNumber == accountNumber);  
+            if (dbAcc == null)
                 throw new AccountNotFoundException("Ошибка: счет не найден");
 
-            if (newAccount == null)
-                throw new ArgumentNullException("Ошибка: cчет не может быть null");
+            _mapper.Map(accountDto, dbAcc);
 
-            return await _clientStorage.UpdateAccountAsync(IdClient, accountNumber, newAccount);
+            return await _clientStorage.UpdateAccountAsync(IdClient, accountNumber, dbAcc);
         }
         public async Task<bool> DeleteAccountAsync(Guid IdClient, string accountNumber)
         {
@@ -180,7 +177,7 @@ namespace BankSystem.App.Services
 
         }
 
-        public async Task<PagedResult<Client>> GetFilterClientsAsync(ClientFilterDTO filter, int page, int pageSize = 10)
+        public async Task<PagedResult<ClientDtoForGet>> GetFilterClientsAsync(ClientFilterDTO filter, int page, int pageSize = 10)
         {
             if (page.Equals(default(int)))
                 throw new ArgumentException(nameof(page), "Ошибка страницы");
@@ -188,7 +185,10 @@ namespace BankSystem.App.Services
             if (pageSize.Equals(default(int)))
                 throw new ArgumentException(nameof(pageSize), "Ошибка: некорректный размер страницы");
 
-            return await _clientStorage.GetFilterClientsAsync(filter, page, pageSize);
+            var pagedResult = await _clientStorage.GetFilterClientsAsync(filter, page, pageSize);
+
+
+            return _mapper.Map<PagedResult<ClientDtoForGet>>(pagedResult);
         }
     }
 }
