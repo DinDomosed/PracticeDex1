@@ -1,4 +1,5 @@
 using AutoMapper;
+using BankSystem.API.Midldeware;
 using BankSystem.App.DTOs.DTOsAccounts;
 using BankSystem.App.DTOs.DTOsForRequestsToControllers;
 using BankSystem.App.DTOs.DTosForRequestsToControllersEmployee;
@@ -81,6 +82,7 @@ namespace BankSystem.API
             builder.Services.AddScoped<EmployeeService>();
 
             var app = builder.Build();
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
             app.MapControllers();
