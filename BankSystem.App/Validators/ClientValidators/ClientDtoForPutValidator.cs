@@ -30,6 +30,8 @@ namespace BankSystem.App.Validators.ClientValidators
             RuleFor(c => c.PhoneNumber)
                 .NotEmpty()
                 .WithMessage("Номер телефона обязателен")
+                .Matches(@"^\+?\d[\d\s\(\)-]{8,16}\d$")
+                .WithMessage("Номер телефона введен некорректно")
                 .When(c => !string.IsNullOrWhiteSpace(c.PhoneNumber));
 
             RuleFor(c => c.PassportNumber)

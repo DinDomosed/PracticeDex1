@@ -77,7 +77,7 @@ namespace BankSystem.App.Services
 
         public async Task<bool> AddClientAsync(Client client)
         {
-            if (client == null)
+            if (client == null) 
                 throw new ArgumentNullException(nameof(client), "Ошибка: Клиент не может быть null");
 
             if (await _clientStorage.ExistsAsync(client.Id, client.PassportNumber))

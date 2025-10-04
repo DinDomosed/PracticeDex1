@@ -24,7 +24,9 @@ namespace BankSystem.App.Validators.EmployeeValidators
 
             RuleFor(c => c.PhoneNumber)
                 .NotEmpty()
-                .WithMessage("Номер телефона обязателен");
+                .WithMessage("Номер телефона обязателен")
+                .Matches(@"^\+?\d[\d\s\(\)-]{8,16}\d$")
+                .WithMessage("Номер телефона введен некорректно");
         }
     }
 }

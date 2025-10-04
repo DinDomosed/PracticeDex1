@@ -13,7 +13,7 @@ namespace BankSystem.App.Validators.AccountValidators
         public CurrencyDtoForPutValidator()
         {
             RuleFor(c => c.Code)
-                .MaximumLength(4)
+                .MaximumLength(3)
                 .WithMessage("Слишком длинный валютный код")
                 .When(c => !string.IsNullOrWhiteSpace(c.Code));
 
