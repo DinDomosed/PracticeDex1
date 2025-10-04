@@ -78,7 +78,9 @@ namespace BankSystem.API.Controllers
             if (result == false)
                 return BadRequest();
 
-            return CreatedAtAction(nameof(GetClient), new { id = client.Id }, clientDto);
+            var clientDtoGet = _mapper.Map<ClientDtoForGet>(client);
+
+            return CreatedAtAction(nameof(GetClient), new { id = client.Id }, clientDtoGet);
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] ClientDtoForPut clientDto)

@@ -64,6 +64,16 @@ namespace BankSystem.API.Midldeware
                         context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
                     }
+                case InvalidDataException:
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        break;
+                    }
+                case InvalidOperationException:
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        break;
+                    }
                 case ArgumentNullException:
                     {
                         context.Response.StatusCode = (int)HttpStatusCode.BadRequest;

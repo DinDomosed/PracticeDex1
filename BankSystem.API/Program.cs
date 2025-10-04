@@ -6,6 +6,7 @@ using BankSystem.App.DTOs.DTosForRequestsToControllersEmployee;
 using BankSystem.App.Interfaces;
 using BankSystem.App.Mappings;
 using BankSystem.App.Services;
+using BankSystem.App.Settings;
 using BankSystem.App.Validators.AccountValidators;
 using BankSystem.App.Validators.ClientValidators;
 using BankSystem.App.Validators.EmployeeValidators;
@@ -60,6 +61,9 @@ namespace BankSystem.API
             builder.Services.AddTransient<IValidator<CurrencyDtoForPut>, CurrencyDtoForPutValidator>();
 
             builder.Services.AddTransient<IValidator<EmployeeClientProfileDtoForPost>, EmployeeClientProfileDtoForPostValidator>();
+
+            builder.Services.Configure<CurrencyService_ApiSettiing>(builder.Configuration.GetSection("CurrencyApi"));
+            builder.Services.AddHttpClient<CurrencyService>();
 
 
             //Добавление автомаппера в DI
