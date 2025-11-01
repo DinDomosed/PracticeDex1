@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace BankSystem.App.Services
@@ -14,11 +15,11 @@ namespace BankSystem.App.Services
     public class RateUpdaterService : BackgroundService
     {
         private readonly IRateProvider _rateProvider;
-        private IClientStorage _clientStorage;
+        private readonly IServiceProvider _serviceProvader;
 
-        public RateUpdaterService(IClientStorage storage, IRateProvider rateProvider)
+        public RateUpdaterService(IServiceProvider serviceProvader, IRateProvider rateProvider)
         {
-            _clientStorage = storage;
+            _serviceProvader = serviceProvader;
             _rateProvider = rateProvider;
         }
 
@@ -30,13 +31,16 @@ namespace BankSystem.App.Services
 
                 await Task.Delay(delay, stoppingToken);
 
-                await RateUpdaterAsync(stoppingToken);
+                await using var scope = _serviceProvader.CreateAsyncScope();
+                var clientStorage = scope.ServiceProvider.GetService<IClientStorage>();
+
+                await RateUpdaterAsync(clientStorage ,stoppingToken);
 
             }
         }
-        internal async Task RateUpdaterAsync(CancellationToken cancellationToken)
+        internal async Task RateUpdaterAsync(IClientStorage clientStorage, CancellationToken cancellationToken)
         {
-            List<Client> allclients = await _clientStorage.GetAllAsync();
+            List<Client> allclients = await clientStorage.GetAllAsync();
             decimal _rate = _rateProvider.GetRate();
 
             foreach (var client in allclients)
@@ -50,7 +54,7 @@ namespace BankSystem.App.Services
 
                     account.PutMoney(accrualAmount);
 
-                    await _clientStorage.UpdateAccountAsync(client.Id, account.AccountNumber, account);
+                    await clientStorage.UpdateAccountAsync(client.Id, account.AccountNumber, account);
                 }
             }
         }
