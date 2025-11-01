@@ -32,7 +32,7 @@ namespace BankSystem.App.Services
                 await Task.Delay(delay, stoppingToken);
 
                 await using var scope = _serviceProvader.CreateAsyncScope();
-                var clientStorage = scope.ServiceProvider.GetService<IClientStorage>();
+                var clientStorage = scope.ServiceProvider.GetRequiredService<IClientStorage>();
 
                 await RateUpdaterAsync(clientStorage ,stoppingToken);
 
