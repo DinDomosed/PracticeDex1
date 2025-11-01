@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace BankSystem.App.Interfaces
 {
-    public interface IDateTimeProvider
+    public interface IRateProvider
     {
-        public DateTime Now { get; }
+        decimal GetRate();
     }
 }

@@ -11,6 +11,7 @@ using BankSystem.App.Validators.AccountValidators;
 using BankSystem.App.Validators.ClientValidators;
 using BankSystem.App.Validators.EmployeeValidators;
 using BankSystem.Data;
+using BankSystem.Data.Providers;
 using BankSystem.Data.Storages;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,14 @@ namespace BankSystem.API
             builder.Services.AddDbContext<BankSystemDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+
+            builder.Services.Configure<RateOptions>(
+                builder.Configuration.GetSection("RateOptions"));
+
+            builder.Services.AddSingleton<IRateProvider, ConfigRateProvider>();
+
+            builder.Services.AddHostedService<RateUpdaterService>();
 
             //Добавление swagger  в DI
             builder.Services.AddEndpointsApiExplorer();

@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using BankSystem.App.Services;
 using BankSystem.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using BankSystem.Data.Providers;
+using BankSystem.App.Settings;
+using Microsoft.Extensions.Options;
 
 namespace BankSystem.App.Tests
 {
@@ -24,7 +27,7 @@ namespace BankSystem.App.Tests
 
             using BankSystemDbContext dbContext = new BankSystemDbContext(options);
             IClientStorage clientStorage = new ClientDbStorage(dbContext);
-            IDateTimeProvider dateProvider = new FakeSystemDateTimeProvider(null);
+            
 
             //Генерируем тесового клиента и счет , добавляем в базу данных
             TestDataGenerator generator = new TestDataGenerator();
@@ -39,9 +42,17 @@ namespace BankSystem.App.Tests
             //Убеждаюсь , что контекст отслеживает все изменения 
             await dbContext.SaveChangesAsync();
 
+            var rateOptions = new RateOptions
+            {
+                Rate = 10m
+            };
+            IOptions<RateOptions> iOptions = Options.Create(rateOptions);
 
-            decimal rate = 10m;
-            RateUpdaterService rateUpdater = new RateUpdaterService(clientStorage, rate, dateProvider);
+            IRateProvider rateProvider = new ConfigRateProvider(iOptions);
+
+
+            decimal rate = rateProvider.GetRate();
+            RateUpdaterService rateUpdater = new RateUpdaterService(clientStorage, rateProvider);
 
             //Токен для остановки 
             using CancellationTokenSource tokenSours = new CancellationTokenSource();

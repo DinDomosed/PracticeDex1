@@ -13,14 +13,13 @@ namespace BankSystem.App.Services
 {
     public class RateUpdaterService : BackgroundService
     {
-        private readonly decimal _rate;
+        private readonly IRateProvider _rateProvider;
         private IClientStorage _clientStorage;
-        private IDateTimeProvider _dateProvider;
-        public RateUpdaterService(IClientStorage storage, decimal rate, IDateTimeProvider dateTimeProvider)
+
+        public RateUpdaterService(IClientStorage storage, IRateProvider rateProvider)
         {
             _clientStorage = storage;
-            _rate = rate;
-            _dateProvider = dateTimeProvider;
+            _rateProvider = rateProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -38,6 +37,7 @@ namespace BankSystem.App.Services
         internal async Task RateUpdaterAsync(CancellationToken cancellationToken)
         {
             List<Client> allclients = await _clientStorage.GetAllAsync();
+            decimal _rate = _rateProvider.GetRate();
 
             foreach (var client in allclients)
             {
@@ -56,7 +56,7 @@ namespace BankSystem.App.Services
         }
         private TimeSpan GetDelayUntilNextMonth()
         {
-            DateTime now = _dateProvider.Now;
+            DateTime now = DateTime.Now;
             DateTime nextMonth = new DateTime(now.Year, now.Month, 1).AddMonths(1);
             TimeSpan delay = nextMonth - now;
             return delay;
